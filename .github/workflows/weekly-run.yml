@@ -28,7 +28,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: '3.13'
 
       - name: Install dependencies
         run: pip install -r requirements.txt
@@ -39,4 +39,4 @@ jobs:
           DAYS="${{ github.event.inputs.days || '7' }}"
 
           echo "Running stats for $USERNAMES over $DAYS days"
-          python src/cli.py stats $USERNAMES --days $DAYS
+          python -m leetcode_accountability.cli stats $USERNAMES --days $DAYS
