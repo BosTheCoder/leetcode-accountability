@@ -81,6 +81,10 @@ def stats(
     output = presenter.present_stats(user_stats_list, days, None)
     print(output)
 
+    # Write to file
+    presenter.write_to_file("report", output)
+    print(f"Report has been written to file")
+
 
 @app.command()
 def weekly_run(
@@ -142,6 +146,11 @@ def weekly_run(
     # Present the stats
     output = presenter.present_stats(user_stats, days, completion_message)
     print(output)
+
+    # Write to file
+    presenter.write_to_file("report", output)
+    print(f"Report has been written to file")
+
 
 
 def main():
