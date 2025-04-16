@@ -5,47 +5,42 @@
 Command-line interface for LeetCode accountability tracking.
 """
 
+import os
 from datetime import datetime
 from typing import List
-import os
+from enum import Enum
 
 import typer
 from dotenv import load_dotenv
 
+from .accountability_service import CodingAccountabilityService
 from .entities import UserStats
 from .leetcode_client import LeetCodeGraphQLClient
-from .submission_service import UserSubmissionsService
-from .accountability_service import CodingAccountabilityService
 from .splitwise_client import SplitwiseClient
+from .submission_service import UserSubmissionsService
 from .util import get_active_users
+from .presenters import get_presenter
+
+# Define output type enum
+class OutputType(str, Enum):
+    TEXT = "text"
+    HTML = "html"
+
 
 # Create a Typer app instance
 app = typer.Typer(help="LeetCode submission statistics CLI")
 
 
-def print_table_header(days: int):
-    """Print the table header."""
-    print(f"\nLeetCode Statistics (Last {days} Days)")
-    print("-" * 80)
-    print(
-        f"{'Username':<20} {'Total Questions':<15} {'Easy':<10} {'Medium':<10} {'Hard':<10}"
-    )
-    print("-" * 80)
-
-
-def print_table_row(stats: UserStats):
-    """Print a row of the table."""
-    print(
-        f"{stats.username:<20} {stats.total_questions:<15} {stats.easy_count:<10} {stats.medium_count:<10} {stats.hard_count:<10}"
-    )
-
-
 @app.command()
 def stats(
     usernames: List[str] = typer.Argument(
-        None, help="List of LeetCode usernames to analyze (defaults to active users if not provided)"
+        None,
+        help="List of LeetCode usernames to analyze (defaults to active users if not provided)",
     ),
     days: int = typer.Option(7, help="Number of days to look back for submissions"),
+    output_type: OutputType = typer.Option(
+        OutputType.TEXT, help="Output format (text or html)"
+    ),
 ):
     """
     Generate LeetCode submission statistics for specified users.
@@ -57,6 +52,9 @@ def stats(
     # Initialize the client and service
     leetcode_client = LeetCodeGraphQLClient()
     submissions_service = UserSubmissionsService(leetcode_client)
+
+    # Get the appropriate presenter
+    presenter = get_presenter(output_type)
 
     # If no usernames provided, use active users
     if not usernames:
@@ -72,22 +70,25 @@ def stats(
         f"Fetching statistics for {len(usernames)} users over the past {days} days..."
     )
 
-    # Print the table header
-    print_table_header(days)
-
     # Get stats for each user
+    user_stats_list = []
     for username in usernames:
+        print(f"Fetching stats for user [{username}]")
         user_stats = submissions_service.get_user_stats(username, days)
-        # Print the stats
-        print_table_row(user_stats)
+        user_stats_list.append(user_stats)
 
-    print("-" * 80)
+    # Present the stats
+    output = presenter.present_stats(user_stats_list, days, None)
+    print(output)
 
 
 @app.command()
 def weekly_run(
     days: int = typer.Option(7, help="Number of days to look back for submissions"),
     cost_per_question: float = typer.Option(10.0, help="Cost per missed question"),
+    output_type: OutputType = typer.Option(
+        OutputType.TEXT, help="Output format (text or html)"
+    ),
 ):
     """
     Run the weekly accountability check for all active users.
@@ -99,11 +100,16 @@ def weekly_run(
     # Get active users
     active_users = get_active_users()
 
+    # Get the appropriate presenter
+    presenter = get_presenter(output_type)
+
     if not active_users:
         print("No active users found.")
         return
 
-    print(f"Running weekly accountability check for {len(active_users)} active users...")
+    print(
+        f"Running weekly accountability check for {len(active_users)} active users..."
+    )
 
     # Initialize services
     leetcode_client = LeetCodeGraphQLClient()
@@ -123,20 +129,19 @@ def weekly_run(
         splitwise_client=splitwise_client,
         users=active_users,
         days=days,
-        cost_per_question=cost_per_question
+        cost_per_question=cost_per_question,
     )
 
     # Run accountability check
     print(f"Holding users accountable for the past {days} days...")
     user_stats = accountability_service.hold_accountable()
 
-    # Print stats for each user
-    print_table_header(days)
-    for stats in user_stats:
-        print_table_row(stats)
+    # Create completion message
+    completion_message = f"Weekly accountability check completed. Users have been charged {cost_per_question} per missed question."
 
-    print("-" * 80)
-    print(f"Weekly accountability check completed. Users have been charged {cost_per_question} per missed question.")
+    # Present the stats
+    output = presenter.present_stats(user_stats, days, completion_message)
+    print(output)
 
 
 def main():
