@@ -3,17 +3,13 @@ name: LeetCode Stats Report
 on:
   workflow_dispatch:
     inputs:
-      usernames:
-        description: 'Space-separated LeetCode usernames'
-        required: false
-        default: ''
       days:
         description: 'Number of days to look back (default 7)'
         required: false
         default: '7'
 
   schedule:
-    - cron: '0 5 * * 1'
+    - cron: '0 5 * * *'  # 6 AM London time daily
 
 jobs:
   run-stats:
@@ -33,11 +29,10 @@ jobs:
       - name: Run CLI and save output
         id: run-script
         run: |
-          USERNAMES="${{ github.event.inputs.usernames || 'bosire123 seth222 osagiog ioByte' }}"
-          DAYS="${{ github.event.inputs.days || '7' }}"
+          DAYS="${{ github.event.inputs.days || '1' }}"
 
-          echo "Running stats for $USERNAMES over $DAYS days"
-          OUTPUT=$(python -m leetcode_accountability.cli stats $USERNAMES --days $DAYS)
+          echo "Running stats for over $DAYS days"
+          OUTPUT=$(python -m leetcode_accountability.cli stats --days $DAYS)
           echo "${OUTPUT}"
           # Save output in a way GitHub can pass it to the next step
           echo "output<<EOF" >> $GITHUB_OUTPUT
@@ -51,13 +46,13 @@ jobs:
           server_port: 465
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: "📊 LeetCode Stats Report"
+          subject: "📊 Daily Coding Group: Leetcode Stats Report"
           to: nyakundi@hotmail.co.uk
-          from: LeetCode Bot <${{ secrets.EMAIL_USERNAME }}>
+          from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
           body: |
             Hello,
 
-            Here is your LeetCode stats report:
+            Here is your Daily LeetCode stats report:
 
             ${{ steps.run-script.outputs.output }}
 
