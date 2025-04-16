@@ -11,10 +11,6 @@ on:
         description: 'Either text or html.'
         required: false
         default: 'html'
-      report_file:
-        description: 'Path of the report file.'
-        required: false
-        default: 'report.html'
 
   schedule:
     - cron: '0 5 * * *'  # 6 AM London time daily
@@ -39,33 +35,18 @@ jobs:
         run: |
           DAYS="${{ github.event.inputs.days || '1' }}"
           OUTPUT_TYPE="${{ github.event.inputs.output_type || 'text' }}"
-          REPORT_FILE="${{ github.event.inputs.report_file || 'report.html' }}"
 
-          echo "Running stats for over $DAYS days"
-          OUTPUT=$(python -m leetcode_accountability.cli stats --days $DAYS --output-type $OUTPUT_TYPE)
-
-          echo "${OUTPUT}"
-
-          if [ -f "$REPORT_FILE" ]; then
-            {
-              echo "output<<EOF"
-              cat "$REPORT_FILE"
-              echo "EOF"
-            } >> "$GITHUB_OUTPUT"
-          else
-            echo "Report file not found: $REPORT_FILE"
-            exit 1
-          fi
+          echo "Running stats for the last $DAYS day(s)…"
+          python -m leetcode_accountability.cli stats --days "$DAYS" --output-type $OUTPUT_TYPE
 
       - name: Send email with output as body
-        uses: dawidd6/action-send-mail@v3
+        uses: dawidd6/action-send-mail@v4
         with:
           server_address: smtp.gmail.com
           server_port: 465
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "📊 Daily Coding Group: Leetcode Stats Report"
-          to: nyakundi@hotmail.co.uk
+          to: daily-coding-group@googlegroups.com
           from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
-          content_type: html
-          body: ${{ steps.run-script.outputs.output }}
+          html_body: file://report.html
