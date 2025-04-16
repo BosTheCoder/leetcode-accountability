@@ -1,3 +1,5 @@
 typer
 pydantic
+python-dotenv
 gql[requests]
+splitwise
