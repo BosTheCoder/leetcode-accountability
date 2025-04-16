@@ -5,14 +5,14 @@ Client for Splitwise API to create expenses and manage user data.
 from __future__ import annotations
 
 import datetime
+import logging
 from dataclasses import dataclass, field
 from typing import List
 
 from splitwise import Splitwise
-from splitwise.expense import Expense
 from splitwise.category import Category
+from splitwise.expense import Expense
 from splitwise.user import ExpenseUser
-import logging
 
 LOGGER = logging.getLogger(__name__)
 
@@ -34,20 +34,16 @@ class SplitwiseExpenseData:
     category: Category = Category().setId(2)
     repeat_interval: str = "never"
     currency_code: str = "GBP"
-    users: List[UserShares] = field(default_factory=list)
+    users: List[UserShare] = field(default_factory=list)
 
 
 class SplitwiseClient:
-    def __init__(
-        self,
-        spi_key: str
-    ):
+    def __init__(self, api_key: str):
         self.splitwise = sObj = Splitwise(
             "<consumer key>", "<consumer secret>", api_key=api_key
         )
         LOGGER.info("Splitwise client initialized with API key.")
         LOGGER.info(sObj.getCurrentUser())
-
 
     def create_expense(self, expense_data: SplitwiseExpenseData):
         expense = Expense()
@@ -99,8 +95,8 @@ if __name__ == "__main__":
         date="2025-04-14T13:00:00Z",
         group_id=group_id,
         users=[
-            UserShares(user_id=6996697, paid_share=0, owed_share=25),
-            UserShares(user_id=103535402, paid_share=25, owed_share=0),
+            UserShare(user_id=6996697, paid_share=0, owed_share=25),
+            UserShare(user_id=103535402, paid_share=25, owed_share=0),
         ],
     )
     print(expense_data)

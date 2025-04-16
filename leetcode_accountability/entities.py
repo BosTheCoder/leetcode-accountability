@@ -18,7 +18,7 @@ class Difficulty(Enum):
 @dataclass
 class UserStats:
     """Data class to hold user submission statistics."""
-    user: str
+    username: str
     total_questions: int = 0
     easy_count: int = 0
     medium_count: int = 0
