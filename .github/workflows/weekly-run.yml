@@ -25,4 +25,4 @@ jobs:
 
       - name: Run CLI with correct inputs
         run:
-          python -m leetcode_accountability.cli weekly-run
+          python -m leetcode_accountability.cli weekly-run --output-type text
