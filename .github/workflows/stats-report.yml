@@ -40,13 +40,11 @@ jobs:
           OUTPUT=$(python -m leetcode_accountability.cli stats --days $DAYS --output-type $OUTPUT_TYPE)
 
           echo "${OUTPUT}"
-
-           # Escape percent signs (optional, for safe GitHub output)
-          ESCAPED_OUTPUT="${OUTPUT//'%'/'%25'}"
-          ESCAPED_OUTPUT="${ESCAPED_OUTPUT//$'\n'/'%0A'}"
-          ESCAPED_OUTPUT="${ESCAPED_OUTPUT//$'\r'/'%0D'}"
-
-          echo "output=$ESCAPED_OUTPUT" >> $GITHUB_OUTPUT
+          
+          # Read the raw HTML from file
+          echo "output<<EOF" >> $GITHUB_OUTPUT
+          cat report.html >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Send email with output as body
         uses: dawidd6/action-send-mail@v3
