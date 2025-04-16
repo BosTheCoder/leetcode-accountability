@@ -18,14 +18,14 @@ LOGGER = logging.getLogger(__name__)
 
 
 @dataclass
-class User:
+class UserShare:
     user_id: int
     paid_share: float = 0.0
     owed_share: float = 0.0
 
 
 @dataclass
-class ExpenseData:
+class SplitwiseExpenseData:
     cost: float
     description: str
     details: str
@@ -34,7 +34,7 @@ class ExpenseData:
     category: Category = Category().setId(2)
     repeat_interval: str = "never"
     currency_code: str = "GBP"
-    users: List[User] = field(default_factory=list)
+    users: List[UserShares] = field(default_factory=list)
 
 
 class SplitwiseClient:
@@ -49,7 +49,7 @@ class SplitwiseClient:
         LOGGER.info(sObj.getCurrentUser())
 
 
-    def create_expense(self, expense_data: ExpenseData):
+    def create_expense(self, expense_data: SplitwiseExpenseData):
         expense = Expense()
         expense.setCost(str(expense_data.cost))
         expense.setDescription(expense_data.description)
@@ -92,15 +92,15 @@ if __name__ == "__main__":
     api_key = os.getenv("SPLITWISE_API_KEY")
     group_id = int(os.getenv("SPLITWISE_GROUP_ID"))
     client = SplitwiseClient(api_key)
-    expense_data = ExpenseData(
+    expense_data = SplitwiseExpenseData(
         cost=25.0,
         description="Grocery run",
         details="Bought vegetables and snacks",
         date="2025-04-14T13:00:00Z",
         group_id=group_id,
         users=[
-            User(user_id=6996697, paid_share=0, owed_share=25),
-            User(user_id=103535402, paid_share=25, owed_share=0),
+            UserShares(user_id=6996697, paid_share=0, owed_share=25),
+            UserShares(user_id=103535402, paid_share=25, owed_share=0),
         ],
     )
     print(expense_data)

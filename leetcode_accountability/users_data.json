@@ -1,0 +1,47 @@
+{
+  "bos": {
+    "name": "bos",
+    "leetcode_id": "bosire123",
+    "splitwise_id": "6996697",
+    "email_address": "nyakundi@hotmail.co.uk",
+    "splitwise_group_id": "76659039",
+    "min_questions": 7,
+    "is_active": 1
+  },
+  "seth": {
+    "name": "seth",
+    "leetcode_id": "seth222",
+    "splitwise_id": "103535402",
+    "email_address": "set.wobble9d@icloud.com",
+    "splitwise_group_id": "76659039",
+    "min_questions": 7,
+    "is_active": 1
+  },
+  "mikkel": {
+    "name": "mikkel",
+    "leetcode_id": "MikkelAllison",
+    "splitwise_id": "39202106",
+    "email_address": "mikkel_a01@hotmail.co.uk",
+    "splitwise_group_id": "76659039",
+    "min_questions": 7,
+    "is_active": 1
+  },
+  "osa": {
+    "name": "osa",
+    "leetcode_id": "osagiog",
+    "splitwise_id": "100418712",
+    "email_address": "henchtechguy@gmail.com",
+    "splitwise_group_id": "76659039",
+    "min_questions": 7,
+    "is_active": 1
+  },
+  "emman": {
+    "name": "emman",
+    "leetcode_id": "ioByte",
+    "splitwise_id": "73320769",
+    "email_address": "e.okyere.eo@gmail.com",
+    "splitwise_group_id": "76659039",
+    "min_questions": 7,
+    "is_active": 0
+  }
+}

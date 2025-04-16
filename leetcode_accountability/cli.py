@@ -67,6 +67,7 @@ def stats(
     print("-" * 80)
 
 
+
 def main():
     """Entry point for the CLI."""
     app()
