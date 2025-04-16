@@ -62,18 +62,29 @@ class TextPresenter(BasePresenter):
         """Format and present the statistics in plain text."""
         output = []
 
+        # Sort users by total questions in descending order
+        sorted_stats = sorted(user_stats_list, key=lambda x: x.total_questions, reverse=True)
+
         # Add header
         output.append(f"\nLeetCode Statistics (Last {days} Days)")
         output.append("-" * 80)
         output.append(
-            f"{'Username':<20} {'Total Questions':<15} {'Easy':<10} {'Medium':<10} {'Hard':<10}"
+            f"{'Username':<25} {'Total Questions':<15} {'Easy':<10} {'Medium':<10} {'Hard':<10}"
         )
         output.append("-" * 80)
 
-        # Add rows for each user
-        for stats in user_stats_list:
+        # Add rows for each user with medals for top 3
+        for i, stats in enumerate(sorted_stats):
+            username_display = stats.username
+            if i == 0:
+                username_display = f"{stats.username} 🥇"
+            elif i == 1:
+                username_display = f"{stats.username} 🥈"
+            elif i == 2:
+                username_display = f"{stats.username} 🥉"
+
             output.append(
-                f"{stats.username:<20} {stats.total_questions:<15} {stats.easy_count:<10} {stats.medium_count:<10} {stats.hard_count:<10}"
+                f"{username_display:<25} {stats.total_questions:<15} {stats.easy_count:<10} {stats.medium_count:<10} {stats.hard_count:<10}"
             )
 
         # Add footer
@@ -107,6 +118,9 @@ class HtmlPresenter(BasePresenter):
         """Format and present the statistics in HTML."""
         html_parts = []
 
+        # Sort users by total questions in descending order
+        sorted_stats = sorted(user_stats_list, key=lambda x: x.total_questions, reverse=True)
+
         # Add HTML header
         html_parts.extend(
             [
@@ -124,6 +138,8 @@ class HtmlPresenter(BasePresenter):
                 "        th { background-color: #f2f2f2; }",
                 "        tr:hover { background-color: #f5f5f5; }",
                 "        .message { margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 5px solid #4285f4; }",
+                "        .first-place { font-weight: bold; }",
+                "        .medal { font-size: 1.2em; }",
                 "    </style>",
                 "</head>",
                 "<body>",
@@ -145,12 +161,24 @@ class HtmlPresenter(BasePresenter):
             ]
         )
 
-        # Add rows for each user
-        for stats in user_stats_list:
+        # Add rows for each user with medals for top 3
+        for i, stats in enumerate(sorted_stats):
+            username_display = stats.username
+            row_class = ""
+            medal = ""
+
+            if i == 0:
+                row_class = ' class="first-place"'
+                medal = ' <span class="medal">🥇</span>'
+            elif i == 1:
+                medal = ' <span class="medal">🥈</span>'
+            elif i == 2:
+                medal = ' <span class="medal">🥉</span>'
+
             html_parts.extend(
                 [
-                    "    <tr>",
-                    f'        <td><a href="https://leetcode.com/u/{stats.username}/" target="_blank">{stats.username}</a></td>',
+                    f'    <tr{row_class}>',
+                    f'        <td><a href="https://leetcode.com/u/{stats.username}/" target="_blank">{stats.username}</a>{medal}</td>',
                     f"        <td>{stats.total_questions}</td>",
                     f"        <td>{stats.easy_count}</td>",
                     f"        <td>{stats.medium_count}</td>",
