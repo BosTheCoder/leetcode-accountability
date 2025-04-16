@@ -10,7 +10,7 @@ on:
       output_type:
         description: 'Either text or html.'
         required: false
-        default: 'text'
+        default: 'html'
 
   schedule:
     - cron: '0 5 * * *'  # 6 AM London time daily
@@ -38,11 +38,15 @@ jobs:
 
           echo "Running stats for over $DAYS days"
           OUTPUT=$(python -m leetcode_accountability.cli stats --days $DAYS --output-type $OUTPUT_TYPE)
+
           echo "${OUTPUT}"
-          # Save output in a way GitHub can pass it to the next step
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          echo "$OUTPUT" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+
+           # Escape percent signs (optional, for safe GitHub output)
+          ESCAPED_OUTPUT="${OUTPUT//'%'/'%25'}"
+          ESCAPED_OUTPUT="${ESCAPED_OUTPUT//$'\n'/'%0A'}"
+          ESCAPED_OUTPUT="${ESCAPED_OUTPUT//$'\r'/'%0D'}"
+
+          echo "output=$ESCAPED_OUTPUT" >> $GITHUB_OUTPUT
 
       - name: Send email with output as body
         uses: dawidd6/action-send-mail@v3
@@ -54,13 +58,5 @@ jobs:
           subject: "📊 Daily Coding Group: Leetcode Stats Report"
           to: nyakundi@hotmail.co.uk
           from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
-          body: |
-            Hello,
-
-            Here is your Daily LeetCode stats report:
-
-            ```
-            ${{ steps.run-script.outputs.output }}
-            ```
-
-            – GitHub Actions Bot
+          content_type: html
+          body: ${{ steps.run-script.outputs.output }}
