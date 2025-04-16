@@ -46,10 +46,16 @@ jobs:
 
           echo "${OUTPUT}"
 
-          # Read the raw HTML from file
-          echo "output<<EOF" >> $GITHUB_OUTPUT
-          cat $REPORT_FILE >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          if [ -f "$REPORT_FILE" ]; then
+            {
+              echo "output<<EOF"
+              cat "$REPORT_FILE"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+          else
+            echo "Report file not found: $REPORT_FILE"
+            exit 1
+          fi
 
       - name: Send email with output as body
         uses: dawidd6/action-send-mail@v3
