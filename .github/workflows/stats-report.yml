@@ -6,7 +6,7 @@ on:
       usernames:
         description: 'Space-separated LeetCode usernames'
         required: false
-        default: 'bosire123 seth222 osagiog ioByte'
+        default: ''
       days:
         description: 'Number of days to look back (default 7)'
         required: false
@@ -52,7 +52,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "📊 LeetCode Stats Report"
-          to: your_email@example.com
+          to: nyakundi@hotmail.co.uk
           from: LeetCode Bot <${{ secrets.EMAIL_USERNAME }}>
           body: |
             Hello,
