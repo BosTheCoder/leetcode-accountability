@@ -43,19 +43,30 @@ def print_table_row(stats: UserStats):
 @app.command()
 def stats(
     usernames: List[str] = typer.Argument(
-        ..., help="List of LeetCode usernames to analyze"
+        None, help="List of LeetCode usernames to analyze (defaults to active users if not provided)"
     ),
     days: int = typer.Option(7, help="Number of days to look back for submissions"),
 ):
     """
     Generate LeetCode submission statistics for specified users.
+    If no usernames are provided, statistics for all active users will be shown.
     """
     # Load environment variables
     load_dotenv()
-    
+
     # Initialize the client and service
     leetcode_client = LeetCodeGraphQLClient()
     submissions_service = UserSubmissionsService(leetcode_client)
+
+    # If no usernames provided, use active users
+    if not usernames:
+        active_users = get_active_users()
+        if not active_users:
+            print("No active users found.")
+            return
+
+        usernames = [user.leetcode_id for user in active_users]
+        print(f"No usernames provided. Using {len(usernames)} active users.")
 
     print(
         f"Fetching statistics for {len(usernames)} users over the past {days} days..."
@@ -66,9 +77,7 @@ def stats(
 
     # Get stats for each user
     for username in usernames:
-        print(f"Processing {username}...")
         user_stats = submissions_service.get_user_stats(username, days)
-
         # Print the stats
         print_table_row(user_stats)
 

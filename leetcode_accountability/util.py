@@ -29,9 +29,9 @@ def load_users() -> Dict[str, User]:
         user = User(
             name=data["name"],
             leetcode_id=data["leetcode_id"],
-            splitwise_id=int(data["splitwise_id"]),
-            splitwise_group_id=int(data["splitwise_group_id"]),
-            email_address=data["email_address"],
+            splitwise_id=int(data["splitwise_id"]) if "splitwise_id" in data else None,
+            splitwise_group_id=int(data["splitwise_group_id"]) if "splitwise_group_id" in data else None,
+            email_address=data["email_address"] if "email_address" in data else None,
             min_questions=int(data["min_questions"]),
             is_active=is_active
         )

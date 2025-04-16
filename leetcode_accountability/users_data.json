@@ -43,5 +43,17 @@
     "splitwise_group_id": "76659039",
     "min_questions": 7,
     "is_active": 1
+  },
+  "khalil": {
+    "name": "khalil",
+    "leetcode_id": "khalilgreenidge16",
+    "min_questions": 7,
+    "is_active": 1
+  },
+  "emma": {
+    "name": "emma",
+    "leetcode_id": "emmanuela_0",
+    "min_questions": 7,
+    "is_active": 1
   }
 }

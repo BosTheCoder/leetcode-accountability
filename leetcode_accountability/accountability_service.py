@@ -32,6 +32,10 @@ class CodingAccountabilityService:
                 print(f"{user.name.capitalize()} has met their goal of {user.min_questions} questions. Skipping user.")
                 continue
 
+            if not user.splitwise_id:
+                print(f"{user.name.capitalize()} does not have a Splitwise ID. Skipping generating expense for user.")
+                continue
+
             cost = num_missed_questions * self.cost_per_question
             description = f"{user.name.capitalize()}: {user_stats.total_questions} questions in last {self.days} days."
             details = "" + \
