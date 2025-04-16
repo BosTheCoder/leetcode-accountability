@@ -4,9 +4,9 @@ on:
   workflow_dispatch:
     inputs:
       days:
-        description: 'Number of days to look back (default 7)'
+        description: 'Number of days to look back.'
         required: false
-        default: '7'
+        default: '1'
 
   schedule:
     - cron: '0 5 * * *'  # 6 AM London time daily
@@ -54,6 +54,8 @@ jobs:
 
             Here is your Daily LeetCode stats report:
 
+            ```
             ${{ steps.run-script.outputs.output }}
+            ```
 
             – GitHub Actions Bot
