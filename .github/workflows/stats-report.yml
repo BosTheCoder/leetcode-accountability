@@ -1,0 +1,42 @@
+# .github/workflows/run-stats.yml
+name: LeetCode Stats Report
+
+on:
+  # Manual trigger with inputs
+  workflow_dispatch:
+    inputs:
+      usernames:
+        description: 'Space-separated LeetCode usernames'
+        required: true
+        default: 'bosire123 seth222 osagiog ioByte'
+      days:
+        description: 'Number of days to look back (default 7)'
+        required: false
+        default: '7'
+
+  # Scheduled run every Monday at 6 AM London time (5 AM UTC)
+  schedule:
+    - cron: '0 5 * * 1'
+
+jobs:
+  run-stats:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.13'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run CLI with correct inputs
+        run: |
+          USERNAMES="${{ github.event.inputs.usernames || 'bosire123 seth222 osagiog ioByte' }}"
+          DAYS="${{ github.event.inputs.days || '7' }}"
+
+          echo "Running stats for $USERNAMES over $DAYS days"
+          python -m leetcode_accountability.cli stats $USERNAMES --days $DAYS

@@ -20,15 +20,22 @@ class CodingAccountabilityService:
 
 
     def hold_accountable(self) -> list[UserStats]:
+        print("--" * 80)
         all_user_stats = []
         for user in self.users:
             user_stats = self.submission_service.get_user_stats(user.leetcode_id, self.days)
             all_user_stats.append(user_stats)
 
             num_missed_questions = user.min_questions - user_stats.total_questions
+
+            if num_missed_questions <= 0:
+                print(f"{user.name.capitalize()} has met their goal of {user.min_questions} questions. Skipping user.")
+                continue
+
             cost = num_missed_questions * self.cost_per_question
+            description = f"{user.name.capitalize()}: {user_stats.total_questions} questions in last {self.days} days."
             details = "" + \
-                f"{user.name} completed {user_stats.total_questions} questions in the last {self.days} days.\n" + \
+                f"{user.name.capitalize()} completed {user_stats.total_questions} questions in the last {self.days} days.\n" + \
                 f"Question Distribution: Easy: {user_stats.easy_count}, Medium: {user_stats.medium_count}, Hard: {user_stats.hard_count}.\n" + \
                 f"Meaning they missed {num_missed_questions} questions from their goal of {user.min_questions}.\n" + \
                 f" They have been charged a cost of £{cost} for this."
@@ -36,7 +43,7 @@ class CodingAccountabilityService:
             expense_data = SplitwiseExpenseData(
                 cost=cost,
                 group_id=user.splitwise_group_id,
-                description=f"{user.name.capitalize()}: {user_stats.total_questions} questions in last {self.days} days.",
+                description=description,
                 details=details,
                 users=[
                     UserShare(
@@ -61,4 +68,7 @@ class CodingAccountabilityService:
                 )
 
             self.splitwise_client.create_expense(expense_data)
+
+            print(f"Created expense for {user.name} with cost £{cost} and description: {description}")
+        print("--" * 80)
         return all_user_stats

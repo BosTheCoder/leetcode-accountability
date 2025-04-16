@@ -24,7 +24,7 @@
     "email_address": "mikkel_a01@hotmail.co.uk",
     "splitwise_group_id": "76659039",
     "min_questions": 7,
-    "is_active": 0
+    "is_active": 1
   },
   "osa": {
     "name": "osa",
@@ -42,6 +42,6 @@
     "email_address": "e.okyere.eo@gmail.com",
     "splitwise_group_id": "76659039",
     "min_questions": 7,
-    "is_active": 0
+    "is_active": 1
   }
 }
