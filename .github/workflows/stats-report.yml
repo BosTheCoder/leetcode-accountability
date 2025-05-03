@@ -17,7 +17,7 @@ on:
         default: 'daily-coding-group@googlegroups.com'
 
   schedule:
-    - cron: '0 5 * * *'  # 6 AM London time daily
+    - cron: '30 3 * * *'  # 6 AM London time daily
 
 jobs:
   run-stats:
