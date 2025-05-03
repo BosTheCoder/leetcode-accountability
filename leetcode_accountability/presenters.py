@@ -267,34 +267,20 @@ class HtmlPresenter(BasePresenter):
                 "        .message { margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 5px solid #4285f4; }",
                 "        .first-place { font-weight: bold; }",
                 "        .medal { font-size: 1.2em; }",
-                "        .user-row { cursor: pointer; }",
                 "        .user-row:hover { background-color: #f0f0f0; }",
-                "        .submissions-container { display: none; }",
-                "        .submissions-table { width: 100%; margin: 0; background-color: #f9f9f9; }",
+                "        .submissions-table { width: 100%; margin: 10px 0; background-color: #f9f9f9; border: 1px solid #ddd; }",
+                "        .submissions-table th { background-color: #eaeaea; }",
                 "        .submissions-table td { padding: 8px 12px; }",
                 "        .difficulty-easy { color: green; }",
                 "        .difficulty-medium { color: orange; }",
                 "        .difficulty-hard { color: red; }",
                 "        .no-submissions { font-style: italic; color: #666; }",
-                "        .chevron::after { content: '▼'; font-size: 0.8em; margin-left: 5px; }",
-                "        .collapsed::after { content: '▶'; }",
+                "        .user-submissions-section { margin-top: 40px; }",
+                "        .user-submissions-header { background-color: #f2f2f2; padding: 10px; border-radius: 5px 5px 0 0; border: 1px solid #ddd; border-bottom: none; }",
                 "        .summary-section { background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }",
                 "        .encouragement { margin-top: 15px; font-style: italic; }",
                 "        .count { font-weight: bold; }",
                 "    </style>",
-                "    <script>",
-                "        function toggleSubmissions(userId) {",
-                "            const submissionsContainer = document.getElementById('submissions-' + userId);",
-                "            const chevron = document.getElementById('chevron-' + userId);",
-                "            if (submissionsContainer.style.display === 'none' || !submissionsContainer.style.display) {",
-                "                submissionsContainer.style.display = 'table-row';",
-                "                chevron.classList.remove('collapsed');",
-                "            } else {",
-                "                submissionsContainer.style.display = 'none';",
-                "                chevron.classList.add('collapsed');",
-                "            }",
-                "        }",
-                "    </script>",
                 "</head>",
                 "<body>",
             ]
@@ -318,24 +304,21 @@ class HtmlPresenter(BasePresenter):
         # Add rows for each user with medals for top 3
         for i, stats in enumerate(sorted_stats):
             username_display = stats.username
-            row_class = "user-row"
+            row_class = ""
             medal = ""
 
             if i == 0:
-                row_class = "user-row first-place"
+                row_class = "first-place"
                 medal = ' <span class="medal">🥇</span>'
             elif i == 1:
                 medal = ' <span class="medal">🥈</span>'
             elif i == 2:
                 medal = ' <span class="medal">🥉</span>'
 
-            # Create a unique ID for this user
-            user_id = f"user-{i}"
-
             html_parts.extend(
                 [
-                    f'    <tr class="{row_class}" onclick="toggleSubmissions(\'{user_id}\')">',
-                    f'        <td><span id="chevron-{user_id}" class="chevron collapsed"></span><a href="https://leetcode.com/u/{stats.username}/" target="_blank">{stats.username}</a>{medal}</td>',
+                    f'    <tr class="{row_class}">',
+                    f'        <td><a href="https://leetcode.com/u/{stats.username}/" target="_blank">{stats.username}</a>{medal}</td>',
                     f"        <td>{stats.total_questions}</td>",
                     f"        <td>{stats.easy_count}</td>",
                     f"        <td>{stats.medium_count}</td>",
@@ -343,51 +326,6 @@ class HtmlPresenter(BasePresenter):
                     "    </tr>",
                 ]
             )
-
-            # Add submissions details row (initially hidden)
-            html_parts.append(
-                f'    <tr id="submissions-{user_id}" class="submissions-container">'
-            )
-            html_parts.append('        <td colspan="5">')
-            html_parts.append('            <table class="submissions-table">')
-
-            # Combine all submissions and sort by time
-            all_submissions = []
-            for submission in stats.easy_submissions:
-                all_submissions.append(
-                    (submission, "difficulty-easy", "🟢")
-                )  # Green for Easy
-            for submission in stats.medium_submissions:
-                all_submissions.append(
-                    (submission, "difficulty-medium", "🟠")
-                )  # Orange for Medium
-            for submission in stats.hard_submissions:
-                all_submissions.append(
-                    (submission, "difficulty-hard", "🔴")
-                )  # Red for Hard
-
-            # Sort all submissions by time (most recent first)
-            all_submissions.sort(key=lambda x: x[0].submission_time, reverse=True)
-
-            # Display all submissions in chronological order with difficulty emoji
-            if all_submissions:
-                for submission, difficulty_class, difficulty_emoji in all_submissions:
-                    submission_date = submission.submission_time.strftime(
-                        "%Y-%m-%d %H:%M"
-                    )
-                    html_parts.append(f"                <tr>")
-                    html_parts.append(
-                        f'                    <td><span class="{difficulty_class}">{difficulty_emoji} <a href="{submission.url}" target="_blank">{submission.name}</a></span> [{submission_date}]</td>'
-                    )
-                    html_parts.append(f"                </tr>")
-            else:
-                html_parts.append(
-                    '                <tr><td class="no-submissions">No submissions in this period.</td></tr>'
-                )
-
-            html_parts.append("            </table>")
-            html_parts.append("        </td>")
-            html_parts.append("    </tr>")
 
         # Close the table
         html_parts.append("</table>")
@@ -416,6 +354,73 @@ class HtmlPresenter(BasePresenter):
         # Add completion message if provided
         if completion_message:
             html_parts.append(f"<div class='message'>{completion_message}</div>")
+
+        # Add detailed submissions section
+        html_parts.append("<h2>Detailed User Submissions</h2>")
+
+        for i, stats in enumerate(sorted_stats):
+            # Create a section for each user's submissions
+            html_parts.append(f"<div class='user-submissions-section'>")
+
+            # Add user header with medal if applicable
+            medal = ""
+            if i == 0:
+                medal = ' 🥇'
+            elif i == 1:
+                medal = ' 🥈'
+            elif i == 2:
+                medal = ' 🥉'
+
+            html_parts.append(f"<div class='user-submissions-header'>")
+            html_parts.append(f"<h3>{stats.username}{medal}'s Submissions</h3>")
+            html_parts.append("</div>")
+
+            # Add submissions table
+            html_parts.append("<table class='submissions-table'>")
+            html_parts.append("<tr>")
+            html_parts.append("<th>Problem</th>")
+            html_parts.append("<th>Difficulty</th>")
+            html_parts.append("<th>Submission Time</th>")
+            html_parts.append("</tr>")
+
+            # Combine all submissions and sort by time
+            all_submissions = []
+            for submission in stats.easy_submissions:
+                all_submissions.append(
+                    (submission, "difficulty-easy", "🟢 Easy")
+                )
+            for submission in stats.medium_submissions:
+                all_submissions.append(
+                    (submission, "difficulty-medium", "🟠 Medium")
+                )
+            for submission in stats.hard_submissions:
+                all_submissions.append(
+                    (submission, "difficulty-hard", "🔴 Hard")
+                )
+
+            # Sort all submissions by time (most recent first)
+            all_submissions.sort(key=lambda x: x[0].submission_time, reverse=True)
+
+            # Display all submissions in chronological order with difficulty emoji
+            if all_submissions:
+                for submission, difficulty_class, difficulty_text in all_submissions:
+                    submission_date = submission.submission_time.strftime(
+                        "%Y-%m-%d %H:%M"
+                    )
+                    html_parts.append("<tr>")
+                    html_parts.append(
+                        f'<td><a href="{submission.url}" target="_blank">{submission.name}</a></td>'
+                    )
+                    html_parts.append(f'<td class="{difficulty_class}">{difficulty_text}</td>')
+                    html_parts.append(f"<td>{submission_date}</td>")
+                    html_parts.append("</tr>")
+            else:
+                html_parts.append(
+                    '<tr><td colspan="3" class="no-submissions">No submissions in this period.</td></tr>'
+                )
+
+            html_parts.append("</table>")
+            html_parts.append("</div>")
 
         # Add HTML footer
         html_parts.extend(["</body>", "</html>"])
