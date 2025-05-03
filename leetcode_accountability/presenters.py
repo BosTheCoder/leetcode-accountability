@@ -11,6 +11,77 @@ from .entities import UserSubmissions
 class BasePresenter:
     """Base class for presenters."""
 
+    def sort_user_stats(
+        self, user_stats_list: List[UserSubmissions]
+    ) -> List[UserSubmissions]:
+        """
+        Sort users by total questions in descending order.
+
+        Args:
+            user_stats_list: List of UserSubmissions objects to sort
+
+        Returns:
+            List[UserSubmissions]: Sorted list of UserSubmissions
+        """
+        return sorted(
+            user_stats_list,
+            key=lambda x: (
+                x.total_questions,
+                x.hard_count,
+                x.medium_count,
+                x.easy_count,
+            ),
+            reverse=True,
+        )
+
+    def get_summary_data(self, user_stats_list: List[UserSubmissions]) -> dict:
+        """
+        Get summary data for the user stats, including top performers and users with no submissions.
+
+        Args:
+            user_stats_list: List of UserSubmissions objects to analyze
+
+        Returns:
+            dict: Dictionary containing summary data
+        """
+        summary = {
+            "top_hard": None,
+            "top_hard_count": 0,
+            "top_medium": None,
+            "top_medium_count": 0,
+            "top_easy": None,
+            "top_easy_count": 0,
+            "no_submissions": []
+        }
+
+        # Find top performers in each difficulty
+        max_hard = 0
+        max_medium = 0
+        max_easy = 0
+
+        for stats in user_stats_list:
+            # Check for users with no submissions
+            if stats.total_questions == 0:
+                summary["no_submissions"].append(stats.username)
+
+            # Check for top performers
+            if stats.hard_count > max_hard:
+                max_hard = stats.hard_count
+                summary["top_hard"] = stats.username
+                summary["top_hard_count"] = stats.hard_count
+
+            if stats.medium_count > max_medium:
+                max_medium = stats.medium_count
+                summary["top_medium"] = stats.username
+                summary["top_medium_count"] = stats.medium_count
+
+            if stats.easy_count > max_easy:
+                max_easy = stats.easy_count
+                summary["top_easy"] = stats.username
+                summary["top_easy_count"] = stats.easy_count
+
+        return summary
+
     def present_submissions(
         self,
         user_stats_list: List[UserSubmissions],
@@ -63,9 +134,7 @@ class TextPresenter(BasePresenter):
         output = []
 
         # Sort users by total questions in descending order
-        sorted_stats = sorted(
-            user_stats_list, key=lambda x: x.total_questions, reverse=True
-        )
+        sorted_stats = self.sort_user_stats(user_stats_list)
 
         # Add detailed submissions section
         output.append("\nDetailed Submissions by User")
@@ -94,7 +163,7 @@ class TextPresenter(BasePresenter):
                         "%Y-%m-%d %H:%M"
                     )
                     output.append(
-                        f"  • {difficulty_emoji} {submission.name} [{submission_date}]"
+                        f"  • {difficulty_emoji} {submission.name} [{submission_date}] - {submission.url}"
                     )
             else:
                 output.append("  No submissions in this period.")
@@ -102,6 +171,27 @@ class TextPresenter(BasePresenter):
             output.append("-" * 80)
 
         # Add footer
+        output.append("-" * 80)
+
+        # Add summary section
+        summary_data = self.get_summary_data(sorted_stats)
+
+        output.append("\nSummary Achievements")
+        output.append("-" * 80)
+
+        if summary_data["top_hard"]:
+            output.append(f"🔴 {summary_data['top_hard']} completed the most hard questions ({summary_data['top_hard_count']}), you're a boss!")
+
+        if summary_data["top_medium"]:
+            output.append(f"🟠 {summary_data['top_medium']} completed the most medium questions ({summary_data['top_medium_count']}), great work!")
+
+        if summary_data["top_easy"]:
+            output.append(f"🟢 {summary_data['top_easy']} completed the most easy questions ({summary_data['top_easy_count']}), keep going!")
+
+        if summary_data["no_submissions"]:
+            users_list = ", ".join(summary_data["no_submissions"])
+            output.append(f"\nPlease everyone try to encourage {users_list} who didn't get any questions done 🥲")
+
         output.append("-" * 80)
 
         # Add Footer
@@ -155,9 +245,7 @@ class HtmlPresenter(BasePresenter):
         html_parts = []
 
         # Sort users by total questions in descending order
-        sorted_stats = sorted(
-            user_stats_list, key=lambda x: x.total_questions, reverse=True
-        )
+        sorted_stats = self.sort_user_stats(user_stats_list)
 
         # Add HTML header
         html_parts.extend(
@@ -171,6 +259,7 @@ class HtmlPresenter(BasePresenter):
                 "    <style>",
                 "        body { font-family: Arial, sans-serif; margin: 20px; }",
                 "        h1 { color: #333; }",
+                "        h2 { color: #555; margin-top: 30px; }",
                 "        table { border-collapse: collapse; width: 100%; margin-top: 20px; }",
                 "        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }",
                 "        th { background-color: #f2f2f2; }",
@@ -189,6 +278,9 @@ class HtmlPresenter(BasePresenter):
                 "        .no-submissions { font-style: italic; color: #666; }",
                 "        .chevron::after { content: '▼'; font-size: 0.8em; margin-left: 5px; }",
                 "        .collapsed::after { content: '▶'; }",
+                "        .summary-section { background-color: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }",
+                "        .encouragement { margin-top: 15px; font-style: italic; }",
+                "        .count { font-weight: bold; }",
                 "    </style>",
                 "    <script>",
                 "        function toggleSubmissions(userId) {",
@@ -299,6 +391,27 @@ class HtmlPresenter(BasePresenter):
 
         # Close the table
         html_parts.append("</table>")
+
+        # Add summary section
+        summary_data = self.get_summary_data(sorted_stats)
+
+        html_parts.append("<h2>Summary Achievements</h2>")
+        html_parts.append("<div class='summary-section'>")
+
+        if summary_data["top_hard"]:
+            html_parts.append(f"<p><span class='difficulty-hard'>🔴</span> <strong>{summary_data['top_hard']}</strong> completed the most hard questions (<span class='count'>{summary_data['top_hard_count']}</span>), you're a boss!</p>")
+
+        if summary_data["top_medium"]:
+            html_parts.append(f"<p><span class='difficulty-medium'>🟠</span> <strong>{summary_data['top_medium']}</strong> completed the most medium questions (<span class='count'>{summary_data['top_medium_count']}</span>), great work!</p>")
+
+        if summary_data["top_easy"]:
+            html_parts.append(f"<p><span class='difficulty-easy'>🟢</span> <strong>{summary_data['top_easy']}</strong> completed the most easy questions (<span class='count'>{summary_data['top_easy_count']}</span>), keep going!</p>")
+
+        if summary_data["no_submissions"]:
+            users_list = ", ".join(summary_data["no_submissions"])
+            html_parts.append(f"<p class='encouragement'>Please everyone try to encourage <strong>{users_list}</strong> who didn't get any questions done 🥲</p>")
+
+        html_parts.append("</div>")
 
         # Add completion message if provided
         if completion_message:
