@@ -3,10 +3,15 @@ Service for processing LeetCode submissions and generating statistics.
 """
 
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
+from typing import Any, Dict, List, TypedDict
 
-from .leetcode_client import LeetCodeGraphQLClient
-from .entities import UserStats
+from .entities import UserStats, Submission, UserSubmissions
+from .leetcode_client import LeetCodeGraphQLClient, RecentSubmission, QuestionDetail
+
+
+class SubmissionWithDetails(RecentSubmission, total=False):
+    """TypedDict representing a submission with optional question details."""
+    difficulty: str
 
 
 class UserSubmissionsService:
@@ -28,8 +33,8 @@ class UserSubmissionsService:
         username: str,
         start_date: datetime,
         end_date: datetime,
-        include_details: bool = False
-    ) -> List[Dict[str, Any]]:
+        include_details: bool = False,
+    ) -> List[SubmissionWithDetails]:
         """
         Get all accepted submissions for a user between two dates.
 
@@ -56,7 +61,9 @@ class UserSubmissionsService:
             if start_date <= submission_date <= end_date:
                 # Optionally fetch question details
                 if include_details:
-                    question_details = self.client.get_question_detail(submission["titleSlug"])
+                    question_details = self.client.get_question_detail(
+                        submission["titleSlug"]
+                    )
                     submission["difficulty"] = question_details["difficulty"]
 
                 # Add to filtered list
@@ -69,8 +76,8 @@ class UserSubmissionsService:
         username: str,
         start_date: datetime,
         end_date: datetime,
-        include_details: bool = False
-    ) -> List[Dict[str, Any]]:
+        include_details: bool = False,
+    ) -> List[SubmissionWithDetails]:
         """
         Get unique questions solved by a user between two dates.
 
@@ -122,3 +129,36 @@ class UserSubmissionsService:
                 stats.add_question(question["difficulty"])
 
         return stats
+
+    def get_user_detailed_submissions(self, username: str, days: int) -> UserSubmissions:
+        """
+        Get detailed submission data for a user over the past number of days.
+
+        Args:
+            username: The LeetCode username.
+            days: Number of days to look back.
+
+        Returns:
+            A UserSubmissions object with lists of submission objects by difficulty.
+        """
+        end_date = datetime.now()
+        start_date = end_date - timedelta(days=days)
+
+        questions = self.get_unique_questions_between_dates(
+            username, start_date, end_date, include_details=True
+        )
+
+        # Create user submissions object
+        user_submissions = UserSubmissions(username=username)
+
+        for question in questions:
+            # Create a submission object
+            submission = Submission(
+                name=question["title"],
+                submission_time=datetime.fromtimestamp(int(question["timestamp"])),
+                difficulty=question["difficulty"]
+            )
+            # Add to the appropriate list
+            user_submissions.add_submission(submission)
+
+        return user_submissions

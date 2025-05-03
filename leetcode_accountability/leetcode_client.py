@@ -4,7 +4,20 @@ LeetCode GraphQL client for interacting with the LeetCode API.
 
 from gql import Client, gql
 from gql.transport.requests import RequestsHTTPTransport
-from typing import List, Dict, Any
+from typing import List, Dict, Any, TypedDict
+
+
+class QuestionDetail(TypedDict):
+    """TypedDict representing details of a LeetCode question."""
+    difficulty: str
+
+
+class RecentSubmission(TypedDict):
+    """TypedDict representing a recent accepted submission from LeetCode."""
+    id: str
+    title: str
+    titleSlug: str
+    timestamp: int
 
 
 class LeetCodeGraphQLClient:
@@ -35,7 +48,7 @@ class LeetCodeGraphQLClient:
             fetch_schema_from_transport=False,
         )
 
-    def get_recent_accepted_submissions(self, username: str, limit: int = 50) -> List[Dict[str, Any]]:
+    def get_recent_accepted_submissions(self, username: str, limit: int = 50) -> List[RecentSubmission]:
         """
         Get recent accepted submissions for a user.
 
@@ -66,7 +79,7 @@ class LeetCodeGraphQLClient:
         result = self.client.execute(query, variable_values=variables)
         return result["recentAcSubmissionList"]
 
-    def get_question_detail(self, title_slug: str) -> Dict[str, Any]:
+    def get_question_detail(self, title_slug: str) -> QuestionDetail:
         """
         Get details for a specific question.
 

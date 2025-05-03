@@ -26,3 +26,18 @@ jobs:
       - name: Run CLI with correct inputs
         run:
           python -m leetcode_accountability.cli weekly-run --output-type text
+
+      - name: Send email with output as body
+        uses: dawidd6/action-send-mail@v4
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "📊 Daily Coding Group: Weekly Run Report"
+          to: daily-coding-group@googlegroups.com
+          from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
+          html_body: file://report.html
+
+
+

@@ -7,19 +7,20 @@ Command-line interface for LeetCode accountability tracking.
 
 import os
 from datetime import datetime
-from typing import List
 from enum import Enum
+from typing import List
 
 import typer
 from dotenv import load_dotenv
 
 from .accountability_service import CodingAccountabilityService
-from .entities import UserStats
+from .entities import UserSubmissions
 from .leetcode_client import LeetCodeGraphQLClient
+from .presenters import get_presenter
 from .splitwise_client import SplitwiseClient
 from .submission_service import UserSubmissionsService
 from .util import get_active_users
-from .presenters import get_presenter
+
 
 # Define output type enum
 class OutputType(str, Enum):
@@ -71,14 +72,16 @@ def stats(
     )
 
     # Get stats for each user
-    user_stats_list = []
+    user_submissions_list = []
     for username in usernames:
-        print(f"Fetching stats for user [{username}]")
-        user_stats = submissions_service.get_user_stats(username, days)
-        user_stats_list.append(user_stats)
+        print(f"Fetching submissions for user [{username}]")
+        user_submissions = submissions_service.get_user_detailed_submissions(
+            username, days
+        )
+        user_submissions_list.append(user_submissions)
 
     # Present the stats
-    output = presenter.present_stats(user_stats_list, days, None)
+    output = presenter.present_stats(user_submissions_list, days, None)
     print(output)
 
     # Write to file
@@ -150,7 +153,6 @@ def weekly_run(
     # Write to file
     presenter.write_to_file("report", output)
     print(f"Report has been written to file")
-
 
 
 def main():

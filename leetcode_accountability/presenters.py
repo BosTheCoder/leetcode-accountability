@@ -5,7 +5,7 @@ Presenters for formatting and displaying LeetCode accountability data.
 import os
 from typing import List, Optional
 
-from .entities import UserStats
+from .entities import UserSubmissions
 
 
 class BasePresenter:
@@ -13,7 +13,7 @@ class BasePresenter:
 
     def present_stats(
         self,
-        user_stats_list: List[UserStats],
+        user_stats_list: List[UserSubmissions],
         days: int,
         completion_message: Optional[str] = None,
     ) -> str:
@@ -21,7 +21,7 @@ class BasePresenter:
         Format and present the statistics for a list of users.
 
         Args:
-            user_stats_list: List of UserStats objects to present
+            user_stats_list: List of UserSubmissions objects to present
             days: Number of days the stats cover
             completion_message: Optional message to display after the stats
 
@@ -47,7 +47,7 @@ class TextPresenter(BasePresenter):
     def write_to_file(self, filename: str, content: str) -> None:
         """Write content to a text file."""
         # Ensure filename has .txt extension
-        if not filename.endswith('.txt'):
+        if not filename.endswith(".txt"):
             filename = f"{filename}.txt"
 
         with open(filename, "w") as f:
@@ -55,7 +55,7 @@ class TextPresenter(BasePresenter):
 
     def present_stats(
         self,
-        user_stats_list: List[UserStats],
+        user_stats_list: List[UserSubmissions],
         days: int,
         completion_message: Optional[str] = None,
     ) -> str:
@@ -63,9 +63,48 @@ class TextPresenter(BasePresenter):
         output = []
 
         # Sort users by total questions in descending order
-        sorted_stats = sorted(user_stats_list, key=lambda x: x.total_questions, reverse=True)
+        sorted_stats = sorted(
+            user_stats_list, key=lambda x: x.total_questions, reverse=True
+        )
 
-        # Add header
+        # Add detailed submissions section
+        output.append("\nDetailed Submissions by User")
+        output.append("=" * 80)
+
+        for stats in sorted_stats:
+            output.append(f"\n{stats.username}'s Submissions:")
+            output.append("-" * 80)
+
+            # Combine all submissions and sort by time
+            all_submissions = []
+            for submission in stats.easy_submissions:
+                all_submissions.append((submission, "🟢"))  # Green for Easy
+            for submission in stats.medium_submissions:
+                all_submissions.append((submission, "🟠"))  # Orange for Medium
+            for submission in stats.hard_submissions:
+                all_submissions.append((submission, "🔴"))  # Red for Hard
+
+            # Sort all submissions by time (most recent first)
+            all_submissions.sort(key=lambda x: x[0].submission_time, reverse=True)
+
+            # Display all submissions in chronological order with difficulty emoji
+            if all_submissions:
+                for submission, difficulty_emoji in all_submissions:
+                    submission_date = submission.submission_time.strftime(
+                        "%Y-%m-%d %H:%M"
+                    )
+                    output.append(
+                        f"  • {difficulty_emoji} {submission.name} [{submission_date}]"
+                    )
+            else:
+                output.append("  No submissions in this period.")
+
+            output.append("-" * 80)
+
+        # Add footer
+        output.append("-" * 80)
+
+        # Add Footer
         output.append(f"\nLeetCode Statistics (Last {days} Days)")
         output.append("-" * 80)
         output.append(
@@ -87,9 +126,6 @@ class TextPresenter(BasePresenter):
                 f"{username_display:<25} {stats.total_questions:<15} {stats.easy_count:<10} {stats.medium_count:<10} {stats.hard_count:<10}"
             )
 
-        # Add footer
-        output.append("-" * 80)
-
         # Add completion message if provided
         if completion_message:
             output.append(completion_message)
@@ -103,7 +139,7 @@ class HtmlPresenter(BasePresenter):
     def write_to_file(self, filename: str, content: str) -> None:
         """Write content to an HTML file."""
         # Ensure filename has .html extension
-        if not filename.endswith('.html'):
+        if not filename.endswith(".html"):
             filename = f"{filename}.html"
 
         with open(filename, "w") as f:
@@ -111,7 +147,7 @@ class HtmlPresenter(BasePresenter):
 
     def present_stats(
         self,
-        user_stats_list: List[UserStats],
+        user_stats_list: List[UserSubmissions],
         days: int,
         completion_message: Optional[str] = None,
     ) -> str:
@@ -119,7 +155,9 @@ class HtmlPresenter(BasePresenter):
         html_parts = []
 
         # Sort users by total questions in descending order
-        sorted_stats = sorted(user_stats_list, key=lambda x: x.total_questions, reverse=True)
+        sorted_stats = sorted(
+            user_stats_list, key=lambda x: x.total_questions, reverse=True
+        )
 
         # Add HTML header
         html_parts.extend(
@@ -140,7 +178,31 @@ class HtmlPresenter(BasePresenter):
                 "        .message { margin: 20px 0; padding: 15px; background-color: #f8f9fa; border-left: 5px solid #4285f4; }",
                 "        .first-place { font-weight: bold; }",
                 "        .medal { font-size: 1.2em; }",
+                "        .user-row { cursor: pointer; }",
+                "        .user-row:hover { background-color: #f0f0f0; }",
+                "        .submissions-container { display: none; }",
+                "        .submissions-table { width: 100%; margin: 0; background-color: #f9f9f9; }",
+                "        .submissions-table td { padding: 8px 12px; }",
+                "        .difficulty-easy { color: green; }",
+                "        .difficulty-medium { color: orange; }",
+                "        .difficulty-hard { color: red; }",
+                "        .no-submissions { font-style: italic; color: #666; }",
+                "        .chevron::after { content: '▼'; font-size: 0.8em; margin-left: 5px; }",
+                "        .collapsed::after { content: '▶'; }",
                 "    </style>",
+                "    <script>",
+                "        function toggleSubmissions(userId) {",
+                "            const submissionsContainer = document.getElementById('submissions-' + userId);",
+                "            const chevron = document.getElementById('chevron-' + userId);",
+                "            if (submissionsContainer.style.display === 'none' || !submissionsContainer.style.display) {",
+                "                submissionsContainer.style.display = 'table-row';",
+                "                chevron.classList.remove('collapsed');",
+                "            } else {",
+                "                submissionsContainer.style.display = 'none';",
+                "                chevron.classList.add('collapsed');",
+                "            }",
+                "        }",
+                "    </script>",
                 "</head>",
                 "<body>",
             ]
@@ -164,21 +226,24 @@ class HtmlPresenter(BasePresenter):
         # Add rows for each user with medals for top 3
         for i, stats in enumerate(sorted_stats):
             username_display = stats.username
-            row_class = ""
+            row_class = "user-row"
             medal = ""
 
             if i == 0:
-                row_class = ' class="first-place"'
+                row_class = 'user-row first-place'
                 medal = ' <span class="medal">🥇</span>'
             elif i == 1:
                 medal = ' <span class="medal">🥈</span>'
             elif i == 2:
                 medal = ' <span class="medal">🥉</span>'
 
+            # Create a unique ID for this user
+            user_id = f"user-{i}"
+
             html_parts.extend(
                 [
-                    f'    <tr{row_class}>',
-                    f'        <td><a href="https://leetcode.com/u/{stats.username}/" target="_blank">{stats.username}</a>{medal}</td>',
+                    f'    <tr class="{row_class}" onclick="toggleSubmissions(\'{user_id}\')">',
+                    f'        <td><span id="chevron-{user_id}" class="chevron collapsed"></span><a href="https://leetcode.com/u/{stats.username}/" target="_blank">{stats.username}</a>{medal}</td>',
                     f"        <td>{stats.total_questions}</td>",
                     f"        <td>{stats.easy_count}</td>",
                     f"        <td>{stats.medium_count}</td>",
@@ -186,6 +251,37 @@ class HtmlPresenter(BasePresenter):
                     "    </tr>",
                 ]
             )
+
+            # Add submissions details row (initially hidden)
+            html_parts.append(f'    <tr id="submissions-{user_id}" class="submissions-container">')
+            html_parts.append('        <td colspan="5">')
+            html_parts.append('            <table class="submissions-table">')
+
+            # Combine all submissions and sort by time
+            all_submissions = []
+            for submission in stats.easy_submissions:
+                all_submissions.append((submission, "difficulty-easy", "🟢"))  # Green for Easy
+            for submission in stats.medium_submissions:
+                all_submissions.append((submission, "difficulty-medium", "🟠"))  # Orange for Medium
+            for submission in stats.hard_submissions:
+                all_submissions.append((submission, "difficulty-hard", "🔴"))  # Red for Hard
+
+            # Sort all submissions by time (most recent first)
+            all_submissions.sort(key=lambda x: x[0].submission_time, reverse=True)
+
+            # Display all submissions in chronological order with difficulty emoji
+            if all_submissions:
+                for submission, difficulty_class, difficulty_emoji in all_submissions:
+                    submission_date = submission.submission_time.strftime("%Y-%m-%d %H:%M")
+                    html_parts.append(f'                <tr>')
+                    html_parts.append(f'                    <td><span class="{difficulty_class}">{difficulty_emoji} {submission.name}</span> [{submission_date}]</td>')
+                    html_parts.append(f'                </tr>')
+            else:
+                html_parts.append('                <tr><td class="no-submissions">No submissions in this period.</td></tr>')
+
+            html_parts.append('            </table>')
+            html_parts.append('        </td>')
+            html_parts.append('    </tr>')
 
         # Close the table
         html_parts.append("</table>")
