@@ -11,6 +11,10 @@ on:
         description: 'Either text or html.'
         required: false
         default: 'html'
+      email_to:
+        description: 'Email address to send the report to.'
+        required: false
+        default: 'daily-coding-group@googlegroups.com'
 
   schedule:
     - cron: '0 5 * * *'  # 6 AM London time daily
@@ -47,6 +51,6 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "📊 Daily Coding Group: Leetcode Stats Report"
-          to: daily-coding-group@googlegroups.com
+          to: ${{ github.event.inputs.email_to || 'daily-coding-group@googlegroups.com' }}
           from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
           html_body: file://report.html
