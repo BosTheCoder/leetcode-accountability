@@ -54,3 +54,4 @@ jobs:
           to: ${{ github.event.inputs.email_to || 'daily-coding-group@googlegroups.com' }}
           from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
           html_body: file://report.html
+          attachments: report.html
