@@ -58,6 +58,36 @@ python -m leetcode_accountability.cli weekly_run
 python -m leetcode_accountability.cli weekly_run --days 14 --cost-per-question 15.0
 ```
 
+## Architecture & Dependency Diagrams ( auto-generated )
+
+| Class Diagram | Module Diagram |
+|:-------------:|:--------------:|
+| ![Class Diagram](documentation/images/classes.png) | ![Module Diagram](documentation/images/modules.png) |
+
+The repository ships with UML diagrams that show **package‐level dependencies** and **class relationships**.
+They are generated with **pyreverse** (bundled inside *pylint*) and **Graphviz** and live in `docs/classes/`.
+
+### How to regenerate the images
+
+```bash
+# 1 – One-time tooling install
+pipx install pylint            # gives you `pyreverse`
+# Linux
+sudo apt-get install graphviz
+# macOS
+# brew install graphviz
+
+# 2 – Create fresh .dot files for the whole project
+pyreverse -o dot -p myproject .
+
+# 3 – Convert the .dot files to roomy PNGs and park them in docs/classes
+dot -Tpng -Gsize=20,20\! -Granksep=2.0 -Gnodesep=1.0 packages_myproject.dot -o docs/classes/packages.png
+dot -Tpng -Gsize=20,20\! -Granksep=2.0 -Gnodesep=1.0 classes_myproject.dot  -o docs/classes/classes.png
+
+# 4 – (Optional) quick-and-simple variant
+pyreverse -o png -p myproject -AS .
+mv classes_myproject.png packages_myproject.png docs/classes/
+
 ## Configuration
 
 ### User Configuration
