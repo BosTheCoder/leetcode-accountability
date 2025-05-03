@@ -11,7 +11,7 @@ from .entities import UserSubmissions
 class BasePresenter:
     """Base class for presenters."""
 
-    def present_stats(
+    def present_submissions(
         self,
         user_stats_list: List[UserSubmissions],
         days: int,
@@ -53,7 +53,7 @@ class TextPresenter(BasePresenter):
         with open(filename, "w") as f:
             f.write(content)
 
-    def present_stats(
+    def present_submissions(
         self,
         user_stats_list: List[UserSubmissions],
         days: int,
@@ -145,7 +145,7 @@ class HtmlPresenter(BasePresenter):
         with open(filename, "w") as f:
             f.write(content)
 
-    def present_stats(
+    def present_submissions(
         self,
         user_stats_list: List[UserSubmissions],
         days: int,
@@ -230,7 +230,7 @@ class HtmlPresenter(BasePresenter):
             medal = ""
 
             if i == 0:
-                row_class = 'user-row first-place'
+                row_class = "user-row first-place"
                 medal = ' <span class="medal">🥇</span>'
             elif i == 1:
                 medal = ' <span class="medal">🥈</span>'
@@ -253,18 +253,26 @@ class HtmlPresenter(BasePresenter):
             )
 
             # Add submissions details row (initially hidden)
-            html_parts.append(f'    <tr id="submissions-{user_id}" class="submissions-container">')
+            html_parts.append(
+                f'    <tr id="submissions-{user_id}" class="submissions-container">'
+            )
             html_parts.append('        <td colspan="5">')
             html_parts.append('            <table class="submissions-table">')
 
             # Combine all submissions and sort by time
             all_submissions = []
             for submission in stats.easy_submissions:
-                all_submissions.append((submission, "difficulty-easy", "🟢"))  # Green for Easy
+                all_submissions.append(
+                    (submission, "difficulty-easy", "🟢")
+                )  # Green for Easy
             for submission in stats.medium_submissions:
-                all_submissions.append((submission, "difficulty-medium", "🟠"))  # Orange for Medium
+                all_submissions.append(
+                    (submission, "difficulty-medium", "🟠")
+                )  # Orange for Medium
             for submission in stats.hard_submissions:
-                all_submissions.append((submission, "difficulty-hard", "🔴"))  # Red for Hard
+                all_submissions.append(
+                    (submission, "difficulty-hard", "🔴")
+                )  # Red for Hard
 
             # Sort all submissions by time (most recent first)
             all_submissions.sort(key=lambda x: x[0].submission_time, reverse=True)
@@ -272,16 +280,22 @@ class HtmlPresenter(BasePresenter):
             # Display all submissions in chronological order with difficulty emoji
             if all_submissions:
                 for submission, difficulty_class, difficulty_emoji in all_submissions:
-                    submission_date = submission.submission_time.strftime("%Y-%m-%d %H:%M")
-                    html_parts.append(f'                <tr>')
-                    html_parts.append(f'                    <td><span class="{difficulty_class}">{difficulty_emoji} {submission.name}</span> [{submission_date}]</td>')
-                    html_parts.append(f'                </tr>')
+                    submission_date = submission.submission_time.strftime(
+                        "%Y-%m-%d %H:%M"
+                    )
+                    html_parts.append(f"                <tr>")
+                    html_parts.append(
+                        f'                    <td><span class="{difficulty_class}">{difficulty_emoji} <a href="{submission.url}" target="_blank">{submission.name}</a></span> [{submission_date}]</td>'
+                    )
+                    html_parts.append(f"                </tr>")
             else:
-                html_parts.append('                <tr><td class="no-submissions">No submissions in this period.</td></tr>')
+                html_parts.append(
+                    '                <tr><td class="no-submissions">No submissions in this period.</td></tr>'
+                )
 
-            html_parts.append('            </table>')
-            html_parts.append('        </td>')
-            html_parts.append('    </tr>')
+            html_parts.append("            </table>")
+            html_parts.append("        </td>")
+            html_parts.append("    </tr>")
 
         # Close the table
         html_parts.append("</table>")

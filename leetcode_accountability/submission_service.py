@@ -144,7 +144,7 @@ class UserSubmissionsService:
         end_date = datetime.now()
         start_date = end_date - timedelta(days=days)
 
-        questions = self.get_unique_questions_between_dates(
+        questions:SubmissionWithDetails = self.get_unique_questions_between_dates(
             username, start_date, end_date, include_details=True
         )
 
@@ -156,7 +156,8 @@ class UserSubmissionsService:
             submission = Submission(
                 name=question["title"],
                 submission_time=datetime.fromtimestamp(int(question["timestamp"])),
-                difficulty=question["difficulty"]
+                difficulty=question["difficulty"],
+                url=f"https://leetcode.com/problems/{question["titleSlug"]}"
             )
             # Add to the appropriate list
             user_submissions.add_submission(submission)

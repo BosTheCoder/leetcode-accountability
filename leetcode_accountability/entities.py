@@ -5,20 +5,21 @@ Core entity models for the LeetCode accountability system.
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Any, Optional, List
+from typing import Any, Dict, List, Optional
 
 
 class Difficulty(Enum):
     """Enum representing LeetCode problem difficulties."""
+
     EASY = "Easy"
     MEDIUM = "Medium"
     HARD = "Hard"
 
 
-
 @dataclass
 class UserStats:
     """Data class to hold user submission statistics."""
+
     username: str
     total_questions: int = 0
     easy_count: int = 0
@@ -39,14 +40,17 @@ class UserStats:
 @dataclass
 class Submission:
     """Data class to represent a single LeetCode submission."""
+
     name: str  # Name of the problem
     submission_time: datetime  # When the submission was made
     difficulty: str  # Difficulty level of the problem (Easy, Medium, Hard)
+    url: str
 
 
 @dataclass
 class UserSubmissions:
     """Data class to hold detailed user submission data with lists of submissions."""
+
     username: str
     easy_submissions: List[Submission] = field(default_factory=list)
     medium_submissions: List[Submission] = field(default_factory=list)
@@ -55,7 +59,11 @@ class UserSubmissions:
     @property
     def total_questions(self) -> int:
         """Get the total number of submissions across all difficulty levels."""
-        return len(self.easy_submissions) + len(self.medium_submissions) + len(self.hard_submissions)
+        return (
+            len(self.easy_submissions)
+            + len(self.medium_submissions)
+            + len(self.hard_submissions)
+        )
 
     @property
     def easy_count(self) -> int:
@@ -85,6 +93,7 @@ class UserSubmissions:
 @dataclass
 class User:
     """Data class to represent a user in the LeetCode accountability system."""
+
     # TODO remove references to specific clients in this base entity class
     name: str
     leetcode_id: str

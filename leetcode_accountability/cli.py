@@ -81,7 +81,7 @@ def stats(
         user_submissions_list.append(user_submissions)
 
     # Present the stats
-    output = presenter.present_stats(user_submissions_list, days, None)
+    output = presenter.present_submissions(user_submissions_list, days, None)
     print(output)
 
     # Write to file
@@ -141,13 +141,13 @@ def weekly_run(
 
     # Run accountability check
     print(f"Holding users accountable for the past {days} days...")
-    user_stats = accountability_service.hold_accountable()
+    user_submissions = accountability_service.hold_accountable()
 
     # Create completion message
     completion_message = f"Weekly accountability check completed. Users have been charged {cost_per_question} per missed question."
 
     # Present the stats
-    output = presenter.present_stats(user_stats, days, completion_message)
+    output = presenter.present_submissions(user_submissions, days, completion_message)
     print(output)
 
     # Write to file
