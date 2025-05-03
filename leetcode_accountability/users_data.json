@@ -55,5 +55,11 @@
     "leetcode_id": "emmanuela_0",
     "min_questions": 7,
     "is_active": 1
+  },
+  "khezia": {
+    "name": "khezia",
+    "leetcode_id": "kheziantomo",
+    "min_questions": 7,
+    "is_active": 1
   }
 }
