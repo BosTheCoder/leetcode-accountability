@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   # Scheduled run every Monday at 6 AM London time (5 AM UTC)
   schedule:
-    - cron: '30 3 * * 1'
+    - cron: '0 5 * * 1'
 
 jobs:
   run-stats:
