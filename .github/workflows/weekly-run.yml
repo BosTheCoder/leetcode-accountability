@@ -11,12 +11,13 @@ on:
         default: 'daily-coding-group@googlegroups.com'
   # Scheduled run every Monday at 6 AM London time (5 AM UTC)
   schedule:
-    - cron: '0 5 * * 1'
+    - cron: '30 3 * * 1'
 
 jobs:
   run-stats:
     runs-on: ubuntu-latest
-
+    env:
+      MY_SECRET: ${{ secrets.SPLITWISE_API_KEY }}
     steps:
       - uses: actions/checkout@v3
 
