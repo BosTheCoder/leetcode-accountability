@@ -4,6 +4,11 @@ name: LeetCode Accountability Weekly Run
 on:
   # Manual trigger with inputs
   workflow_dispatch:
+    inputs:
+      email_to:
+        description: 'Email address to send the report to.'
+        required: false
+        default: 'daily-coding-group@googlegroups.com'
   # Scheduled run every Monday at 6 AM London time (5 AM UTC)
   schedule:
     - cron: '30 3 * * 1'
@@ -25,7 +30,7 @@ jobs:
 
       - name: Run CLI with correct inputs
         run:
-          python -m leetcode_accountability.cli weekly-run --output-type text
+          python -m leetcode_accountability.cli weekly-run --output-type html
 
       - name: Send email with output as body
         uses: dawidd6/action-send-mail@v4
@@ -35,7 +40,7 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "📊 Daily Coding Group: Weekly Run Report"
-          to: daily-coding-group@googlegroups.com
+          to: ${{ github.event.inputs.email_to || 'daily-coding-group@googlegroups.com' }}
           from: LeetCode Accoutability Bot <${{ secrets.EMAIL_USERNAME }}>
           html_body: file://report.html
 
