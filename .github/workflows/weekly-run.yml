@@ -47,7 +47,7 @@ jobs:
           START_DATE="${{ github.event.inputs.start_date }}"
           END_DATE="${{ github.event.inputs.end_date }}"
 
-          python -m leetcode_accountability.cli weekly-run --days $DAYS --start-date $START_DATE --end-date $END_DATE --output-type html
+          python -m leetcode_accountability.cli accountability --days $DAYS --start-date $START_DATE --end-date $END_DATE --output-type html
 
       - name: Send email with output as body
         uses: dawidd6/action-send-mail@v4
