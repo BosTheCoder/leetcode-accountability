@@ -15,6 +15,8 @@ from dataclasses import dataclass
 import typer
 from dotenv import load_dotenv
 
+from leetcode_accountability.config import setup_logging
+
 from .accountability_service import CodingAccountabilityService
 from .entities import UserSubmissions
 from .leetcode_client import LeetCodeGraphQLClient
@@ -25,14 +27,9 @@ from .user_loader_service import get_active_users
 from .date_utils import parse_optional_datetime
 
 
+setup_logging()
 LOGGER = logging.getLogger(__name__)
 
-logging.basicConfig(
-    level=logging.INFO,  # or DEBUG if you want more detailed output
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    datefmt="%Y-%m-%d %H:%M:%S",
-)
-logging.getLogger("gql.transport.requests").setLevel(logging.WARNING)
 # Define output type enum
 class OutputType(str, Enum):
     TEXT = "text"
