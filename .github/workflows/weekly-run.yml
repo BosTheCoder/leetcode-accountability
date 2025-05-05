@@ -6,9 +6,9 @@ on:
   workflow_dispatch:
     inputs:
       days:
-        description: 'Number of days to look back.'
+        description: 'Number of days to look back. (Either int or None)'
         required: false
-        default: '7'
+        default: 'None'
       start_date:
         description: 'Start Dat. format: YYYY-MM-DDTHH:MM:SS or None/null'
         required: false

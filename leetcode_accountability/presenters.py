@@ -11,8 +11,8 @@ from .entities import UserSubmissions
 class BasePresenter:
     """Base class for presenters."""
 
-    def sort_user_stats(
-        self, user_stats_list: List[UserSubmissions]
+    def sort_user_submissions(
+        self, user_submissions_list: List[UserSubmissions]
     ) -> List[UserSubmissions]:
         """
         Sort users by total questions in descending order.
@@ -24,7 +24,7 @@ class BasePresenter:
             List[UserSubmissions]: Sorted list of UserSubmissions
         """
         return sorted(
-            user_stats_list,
+            user_submissions_list,
             key=lambda x: (
                 x.total_questions,
                 x.hard_count,
@@ -34,7 +34,7 @@ class BasePresenter:
             reverse=True,
         )
 
-    def get_summary_data(self, user_stats_list: List[UserSubmissions]) -> dict:
+    def get_summary_data(self, user_submissions_list: List[UserSubmissions]) -> dict:
         """
         Get summary data for the user stats, including top performers and users with no submissions.
 
@@ -59,7 +59,7 @@ class BasePresenter:
         max_medium = 0
         max_easy = 0
 
-        for stats in user_stats_list:
+        for stats in user_submissions_list:
             # Check for users with no submissions
             if stats.total_questions == 0:
                 summary["no_submissions"].append(stats.username)
@@ -84,7 +84,7 @@ class BasePresenter:
 
     def present_submissions(
         self,
-        user_stats_list: List[UserSubmissions],
+        user_submissions_list: List[UserSubmissions],
         days: int,
         completion_message: Optional[str] = None,
     ) -> str:
@@ -126,7 +126,7 @@ class TextPresenter(BasePresenter):
 
     def present_submissions(
         self,
-        user_stats_list: List[UserSubmissions],
+        user_submissions_list: List[UserSubmissions],
         days: int,
         completion_message: Optional[str] = None,
     ) -> str:
@@ -134,7 +134,7 @@ class TextPresenter(BasePresenter):
         output = []
 
         # Sort users by total questions in descending order
-        sorted_stats = self.sort_user_stats(user_stats_list)
+        sorted_stats = self.sort_user_submissions(user_submissions_list)
 
         # Add detailed submissions section
         output.append("\nDetailed Submissions by User")
@@ -245,7 +245,7 @@ class HtmlPresenter(BasePresenter):
         html_parts = []
 
         # Sort users by total questions in descending order
-        sorted_stats = self.sort_user_stats(user_stats_list)
+        sorted_stats = self.sort_user_submissions(user_stats_list)
 
         # Add HTML header
         html_parts.extend(

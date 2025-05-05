@@ -91,9 +91,6 @@ def stats(
     leetcode_client = LeetCodeGraphQLClient()
     submissions_service = UserSubmissionsService(leetcode_client)
 
-    # Get the appropriate presenter
-    presenter = get_presenter(output_type)
-
     # If no usernames provided, use active users
     if not usernames:
         usernames = [user.leetcode_id for user in get_active_users()]
@@ -110,9 +107,15 @@ def stats(
         )
         user_submissions_list.append(user_submissions)
 
-    # Present the stats
+     # Get the appropriate presenter & present the stats
+    presenter = get_presenter(output_type)
     output = presenter.present_submissions(user_submissions_list, date_range.days, None)
-    LOGGER.info(output)
+    if output_type != OutputType.TEXT:
+        text_presenter = get_presenter(OutputType.TEXT)
+        text_output = text_presenter.present_submissions(user_submissions_list, date_range.days, None)
+        LOGGER.info(text_output)
+    else:
+        LOGGER.info(output)
 
     # Write to file
     presenter.write_to_file("report", output)
@@ -148,10 +151,6 @@ def accountability(
     active_users = get_active_users()
     assert active_users, "No active users found. Please check your user data."
 
-    # Get the appropriate presenter
-    presenter = get_presenter(output_type)
-
-
     # Initialize Splitwise client
     splitwise_api_key = os.environ["SPLITWISE_API_KEY"]
     splitwise_client = SplitwiseClient(splitwise_api_key)
@@ -171,8 +170,17 @@ def accountability(
 
     # Present the stats
     completion_message = f"Accountability check completed. Users have been charged {cost_per_question} per missed question."
+
+    # Get the appropriate presenter & present the stats
+    presenter = get_presenter(output_type)
     output = presenter.present_submissions(user_submissions, date_range.days, completion_message)
-    LOGGER.info(output)
+
+    if output_type != OutputType.TEXT:
+        text_presenter = get_presenter(OutputType.TEXT)
+        text_output = text_presenter.present_submissions(user_submissions, date_range.days, completion_message)
+        LOGGER.info(text_output)
+    else:
+        LOGGER.info(output)
 
     # Write to file
     presenter.write_to_file("report", output)
