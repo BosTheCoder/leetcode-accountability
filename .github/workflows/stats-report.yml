@@ -7,6 +7,14 @@ on:
         description: 'Number of days to look back.'
         required: false
         default: '1'
+      start_date:
+        description: 'Start Dat. format: YYYY-MM-DDTHH:MM:SS or None/null'
+        required: false
+        default: 'None'
+      end_date:
+        description: 'End Date. format: YYYY-MM-DDTHH:MM:SS or None/null'
+        required: false
+        default: 'None'
       output_type:
         description: 'Either text or html.'
         required: false
@@ -38,10 +46,11 @@ jobs:
         id: run-script
         run: |
           DAYS="${{ github.event.inputs.days || '1' }}"
+          START_DATE="${{ github.event.inputs.start_date }}"
+          END_DATE="${{ github.event.inputs.end_date }}"
           OUTPUT_TYPE="${{ github.event.inputs.output_type || 'html' }}"
 
-          echo "Running stats for the last $DAYS day(s)…"
-          python -m leetcode_accountability.cli stats --days "$DAYS" --output-type $OUTPUT_TYPE
+          python -m leetcode_accountability.cli stats --days $DAYS --start-date $START_DATE --end-date $END_DATE --output-type $OUTPUT_TYPE
 
       - name: Send email with output as body
         uses: dawidd6/action-send-mail@v4

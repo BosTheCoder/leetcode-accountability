@@ -3,11 +3,13 @@ Utility functions for the LeetCode accountability system.
 """
 
 import json
+import logging
 from typing import Dict, List, Optional
 from pathlib import Path
 
 from leetcode_accountability.entities import User
 
+LOGGER = logging.getLogger(__name__)
 
 def load_users() -> Dict[str, User]:
     """
@@ -17,6 +19,7 @@ def load_users() -> Dict[str, User]:
         Dict[str, User]: A dictionary of User objects with name as the key.
     """
     json_path = Path(__file__).parent / "users_data.json"
+    LOGGER.info("Loading users from JSON file [%s]...", json_path)
 
     with open(json_path, "r") as f:
         users_data = json.load(f)
@@ -37,6 +40,7 @@ def load_users() -> Dict[str, User]:
         )
         users[name] = user
 
+    LOGGER.info(f"Loaded {len(users)} users.")
     return users
 
 
@@ -47,19 +51,10 @@ def get_active_users() -> List[User]:
     Returns:
         List[User]: A list of active User objects.
     """
+    LOGGER.info("Loading active users...")
+
     users = load_users()
-    return [user for user in users.values() if user.is_active]
+    active_users = [user for user in users.values() if user.is_active]
 
-
-def get_user_by_name(name: str) -> Optional[User]:
-    """
-    Get a user by their name.
-
-    Args:
-        name (str): The name of the user to retrieve.
-
-    Returns:
-        Optional[User]: The User object if found, None otherwise.
-    """
-    users = load_users()
-    return users.get(name)
+    LOGGER.info(f"Loaded {len(active_users)} active users.")
+    return active_users

@@ -46,6 +46,7 @@ class SplitwiseClient:
         LOGGER.info(sObj.getCurrentUser())
 
     def create_expense(self, expense_data: SplitwiseExpenseData):
+        LOGGER.info("Creating expense with data: %s", expense_data)
         expense = Expense()
         expense.setCost(str(expense_data.cost))
         expense.setDescription(expense_data.description)
