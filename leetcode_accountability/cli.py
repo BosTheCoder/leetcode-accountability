@@ -50,7 +50,7 @@ class DateRange:
             self.start_date = self.end_date - timedelta(days=self.days)
         elif self.start_date is not None and self.end_date is not None:
             # Both start_date and end_date are provided, calculate days
-            self.days = (self.end_date - self.start_date).days + 1
+            self.days = (self.end_date - self.start_date).days
         else:
             raise ValueError("Either 'days' or both 'start_date' and 'end_date' must be provided")
 
