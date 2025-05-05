@@ -25,6 +25,12 @@ class UserSubmissionsService:
 
         Args:
             leetcode_client: An instance of LeetCodeGraphQLClient.
+            days: Optional number of days to look back from current date.
+            start_date: Optional start date for filtering submissions.
+            end_date: Optional end date for filtering submissions.
+
+        Raises:
+            ValueError: If neither days nor both start_date and end_date are provided.
         """
         self.client = leetcode_client
 
@@ -130,20 +136,18 @@ class UserSubmissionsService:
 
         return stats
 
-    def get_user_detailed_submissions(self, username: str, days: int) -> UserSubmissions:
+    def get_user_detailed_submissions_by_date_range(self, username: str, start_date: datetime, end_date: datetime) -> UserSubmissions:
         """
-        Get detailed submission data for a user over the past number of days.
+        Get detailed submission data for a user between specified start and end dates.
 
         Args:
             username: The LeetCode username.
-            days: Number of days to look back.
+            start_date: The start date for filtering submissions.
+            end_date: The end date for filtering submissions.
 
         Returns:
             A UserSubmissions object with lists of submission objects by difficulty.
         """
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=days)
-
         questions:SubmissionWithDetails = self.get_unique_questions_between_dates(
             username, start_date, end_date, include_details=True
         )

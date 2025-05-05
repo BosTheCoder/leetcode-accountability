@@ -6,9 +6,10 @@ Command-line interface for LeetCode accountability tracking.
 """
 
 import os
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
-from typing import List
+from typing import List, Optional
+from dataclasses import dataclass
 
 import typer
 from dotenv import load_dotenv
@@ -28,6 +29,25 @@ class OutputType(str, Enum):
     HTML = "html"
 
 
+@dataclass
+class DateRange:
+    """Class to handle date range options for CLI commands."""
+    start_date: Optional[datetime] = None
+    end_date: Optional[datetime] = None
+    days: Optional[int] = None
+
+    def __post_init__(self):
+        """Validate and set date range based on provided parameters."""
+        if self.days is not None:
+            self.end_date = datetime.now()
+            self.start_date = self.end_date - timedelta(days=self.days)
+        elif self.start_date is not None and self.end_date is not None:
+            # Both start_date and end_date are provided, calculate days
+            self.days = (self.end_date - self.start_date).days + 1
+        else:
+            raise ValueError("Either 'days' or both 'start_date' and 'end_date' must be provided")
+
+
 # Create a Typer app instance
 app = typer.Typer(help="LeetCode submission statistics CLI")
 
@@ -38,7 +58,9 @@ def stats(
         None,
         help="List of LeetCode usernames to analyze (defaults to active users if not provided)",
     ),
-    days: int = typer.Option(7, help="Number of days to look back for submissions"),
+    days: int = typer.Option(None, help="Number of days to look back for submissions"),
+    start_date: Optional[datetime] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)"),
+    end_date: Optional[datetime] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)"),
     output_type: OutputType = typer.Option(
         OutputType.TEXT, help="Output format (text or html)"
     ),
@@ -67,21 +89,28 @@ def stats(
         usernames = [user.leetcode_id for user in active_users]
         print(f"No usernames provided. Using {len(usernames)} active users.")
 
-    print(
-        f"Fetching statistics for {len(usernames)} users over the past {days} days..."
-    )
+    # Create date range from provided parameters
+    try:
+        date_range = DateRange(days=days, start_date=start_date, end_date=end_date)
+        if days:
+            print(f"Fetching statistics for {len(usernames)} users over the past {days} days...")
+        else:
+            print(f"Fetching statistics for {len(usernames)} users between {date_range.start_date.isoformat()} and {date_range.end_date.isoformat()}...")
+    except ValueError as e:
+        print(f"Error: {e}")
+        return
 
     # Get stats for each user
     user_submissions_list = []
     for username in usernames:
         print(f"Fetching submissions for user [{username}]")
-        user_submissions = submissions_service.get_user_detailed_submissions(
-            username, days
+        user_submissions = submissions_service.get_user_detailed_submissions_by_date_range(
+            username, date_range.start_date, date_range.end_date
         )
         user_submissions_list.append(user_submissions)
 
     # Present the stats
-    output = presenter.present_submissions(user_submissions_list, days, None)
+    output = presenter.present_submissions(user_submissions_list, date_range.days, None)
     print(output)
 
     # Write to file
@@ -91,7 +120,9 @@ def stats(
 
 @app.command()
 def weekly_run(
-    days: int = typer.Option(7, help="Number of days to look back for submissions"),
+    days: int = typer.Option(None, help="Number of days to look back for submissions"),
+    start_date: Optional[datetime] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)"),
+    end_date: Optional[datetime] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)"),
     cost_per_question: float = typer.Option(10.0, help="Cost per missed question"),
     output_type: OutputType = typer.Option(
         OutputType.TEXT, help="Output format (text or html)"
@@ -114,40 +145,34 @@ def weekly_run(
         print("No active users found.")
         return
 
-    print(
-        f"Running weekly accountability check for {len(active_users)} active users..."
-    )
-
-    # Initialize services
-    leetcode_client = LeetCodeGraphQLClient()
-    submissions_service = UserSubmissionsService(leetcode_client)
-
-    # Initialize Splitwise client
-    api_key = os.getenv("SPLITWISE_API_KEY")
-    if not api_key:
-        print("Error: SPLITWISE_API_KEY environment variable not found.")
+    # Create date range from provided parameters
+    try:
+        date_range = DateRange(days=days, start_date=start_date, end_date=end_date)
+        print(f"Running weekly accountability check for {len(active_users)} active users over the past {date_range.days} days (between {date_range.start_date.isoformat()} and {date_range.end_date.isoformat()})...")
+    except ValueError as e:
+        print(f"Error: {e}")
         return
 
-    splitwise_client = SplitwiseClient(api_key)
+    # Initialize Splitwise client
+    splitwise_api_key = os.environ["SPLITWISE_API_KEY"]
+    splitwise_client = SplitwiseClient(splitwise_api_key)
 
     # Initialize accountability service
+    leetcode_client = LeetCodeGraphQLClient()
+    submissions_service = UserSubmissionsService(leetcode_client)
     accountability_service = CodingAccountabilityService(
         submission_service=submissions_service,
         splitwise_client=splitwise_client,
         users=active_users,
-        days=days,
         cost_per_question=cost_per_question,
     )
 
     # Run accountability check
-    print(f"Holding users accountable for the past {days} days...")
-    user_submissions = accountability_service.hold_accountable()
-
-    # Create completion message
-    completion_message = f"Weekly accountability check completed. Users have been charged {cost_per_question} per missed question."
+    user_submissions = accountability_service.hold_accountable(date_range.start_date, date_range.end_date)
 
     # Present the stats
-    output = presenter.present_submissions(user_submissions, days, completion_message)
+    completion_message = f"Accountability check completed. Users have been charged {cost_per_question} per missed question."
+    output = presenter.present_submissions(user_submissions, date_range.days, completion_message)
     print(output)
 
     # Write to file

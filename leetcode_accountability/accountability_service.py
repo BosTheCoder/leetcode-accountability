@@ -17,28 +17,27 @@ class CodingAccountabilityService:
         submission_service: UserSubmissionsService,
         splitwise_client: SplitwiseClient,
         users: list[User],
-        days: int = 7,
         cost_per_question: float = 10,
     ):
         """Initialize the AccountabilityService."""
         self.submission_service = submission_service
         self.splitwise_client = splitwise_client
         self.users = users
-        self.days = days
         self.cost_per_question = cost_per_question
 
-    def hold_accountable(self) -> list[UserSubmissions]:
+    def hold_accountable(self, start_date: datetime, end_date: datetime) -> list[UserSubmissions]:
         """
         Hold users accountable for their LeetCode submissions.
 
         This method processes each user, retrieves their detailed submission data,
         and creates Splitwise expenses for users who haven't met their goals.
         """
+        print(f"Holding users accountable between {start_date.date()} and {end_date.date()}...")
         print("--" * 80)
         all_user_submissions = []
         for user in self.users:
-            user_submissions = self.submission_service.get_user_detailed_submissions(
-                user.leetcode_id, self.days
+            user_submissions = self.submission_service.get_user_detailed_submissions_by_date_range(
+                user.leetcode_id, start_date, end_date
             )
             all_user_submissions.append(user_submissions)
 
@@ -57,10 +56,13 @@ class CodingAccountabilityService:
                 continue
 
             cost = num_missed_questions * self.cost_per_question
-            description = f"{user.name.capitalize()}: {user_submissions.total_questions} questions in last {self.days} days."
+            # Calculate the number of days in the date range
+            days_in_range = (end_date - start_date).days + 1
+
+            description = f"{user.name.capitalize()}: {user_submissions.total_questions} questions between {start_date.date()} and {end_date.date()}."
             details = (
                 ""
-                + f"{user.name.capitalize()} completed {user_submissions.total_questions} questions in the last {self.days} days.\n"
+                + f"{user.name.capitalize()} completed {user_submissions.total_questions} questions between {start_date.date()} and {end_date.date()}.\n"
                 + f"Question Distribution: Easy: {user_submissions.easy_count}, Medium: {user_submissions.medium_count}, Hard: {user_submissions.hard_count}.\n"
                 + f"Meaning they missed {num_missed_questions} questions from their goal of {user.min_questions}.\n"
                 + f" They have been charged a cost of £{cost} for this."
