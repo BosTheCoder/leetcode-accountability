@@ -1,6 +1,6 @@
 from typing import Optional
 import typer
-import datetime
+from datetime import datetime
 
 def parse_optional_datetime(value: str | None) -> Optional[datetime]:
     if value is None:
