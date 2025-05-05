@@ -24,7 +24,7 @@ from .presenters import get_presenter
 from .splitwise_client import SplitwiseClient
 from .submission_service import UserSubmissionsService
 from .user_loader_service import get_active_users
-from .date_utils import parse_optional_datetime
+from .date_utils import parse_optional_datetime, parse_optional_int
 
 
 setup_logging()
@@ -65,7 +65,7 @@ def stats(
         None,
         help="List of LeetCode usernames to analyze (defaults to active users if not provided)",
     ),
-    days: int = typer.Option(None, help="Number of days to look back for submissions"),
+    days: Optional[str] = typer.Option(None, help="Number of days to look back for submissions", callback=parse_optional_int),
     start_date: Optional[str] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     end_date: Optional[str] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     output_type: OutputType = typer.Option(
@@ -78,6 +78,7 @@ def stats(
     """
     LOGGER.info("Generating LeetCode submission statistics...")
 
+    days = cast(Optional[int], days)
     start_date = cast(Optional[datetime], start_date)
     end_date = cast(Optional[datetime], end_date)
     date_range = DateRange(days=days, start_date=start_date, end_date=end_date)
@@ -120,7 +121,7 @@ def stats(
 
 @app.command()
 def accountability(
-    days: int = typer.Option(None, help="Number of days to look back for submissions"),
+    days: Optional[str] = typer.Option(None, help="Number of days to look back for submissions", callback=parse_optional_int),
     start_date: Optional[str] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     end_date: Optional[str] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     cost_per_question: float = typer.Option(10.0, help="Cost per missed question"),
@@ -134,6 +135,7 @@ def accountability(
     """
     LOGGER.info("Running accountability check...")
 
+    days = cast(Optional[int], days)
     start_date = cast(Optional[datetime], start_date)
     end_date = cast(Optional[datetime], end_date)
     date_range = DateRange(days=days, start_date=start_date, end_date=end_date)
