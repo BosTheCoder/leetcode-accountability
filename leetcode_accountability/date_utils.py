@@ -5,7 +5,7 @@ from datetime import datetime
 def parse_optional_datetime(value: str | None) -> Optional[datetime]:
     if value is None:
         return None
-    if isinstance(value, str) and value.lower() in ("none", "null"):
+    if isinstance(value, str) and value.lower() in ("none", "null", ""):
         return None
     try:
         return datetime.fromisoformat(value)
@@ -16,7 +16,7 @@ def parse_optional_datetime(value: str | None) -> Optional[datetime]:
 def parse_optional_int(value: str | None) -> Optional[int]:
     if value is None:
         return None
-    if isinstance(value, str) and value.lower() in ("none", "null"):
+    if isinstance(value, str) and value.lower() in ("none", "null", ""):
         return None
     try:
         return int(value)
