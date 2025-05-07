@@ -43,9 +43,9 @@ jobs:
 
       - name: Run CLI with correct inputs
         run: |
-          DAYS="${{ github.event.inputs.days }}"
-          START_DATE="${{ github.event.inputs.start_date }}"
-          END_DATE="${{ github.event.inputs.end_date }}"
+          DAYS="${{ github.event.inputs.days || '7'}}"
+          START_DATE="${{ github.event.inputs.start_date || 'None' }}"
+          END_DATE="${{ github.event.inputs.end_date || 'None' }}"
 
           python -m leetcode_accountability.cli accountability --days $DAYS --start-date $START_DATE --end-date $END_DATE --output-type html
 
