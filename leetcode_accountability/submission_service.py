@@ -32,7 +32,7 @@ class UserSubmissionsService:
         Raises:
             ValueError: If neither days nor both start_date and end_date are provided.
         """
-        self.client = leetcode_client
+        self.leetcode_client = leetcode_client
 
     def get_submissions_between_dates(
         self,
@@ -55,7 +55,7 @@ class UserSubmissionsService:
         """
         # Get a large number of submissions to ensure we cover the date range
         # LeetCode might limit this, so we'll take a reasonable limit
-        submissions = self.client.get_recent_accepted_submissions(username, limit=20)
+        submissions = self.leetcode_client.get_recent_accepted_submissions(username, limit=20)
 
         # Filter submissions by date range
         filtered_submissions = []
@@ -67,7 +67,7 @@ class UserSubmissionsService:
             if start_date <= submission_date <= end_date:
                 # Optionally fetch question details
                 if include_details:
-                    question_details = self.client.get_question_detail(
+                    question_details = self.leetcode_client.get_question_detail(
                         submission["titleSlug"]
                     )
                     submission["difficulty"] = question_details["difficulty"]
