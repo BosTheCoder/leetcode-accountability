@@ -86,15 +86,21 @@ class UserSubmissionsService:
         start_date: datetime,
         end_date: datetime,
         include_details: bool = False,
+        min_hours_between_submissions: int = 24,
     ) -> List[SubmissionWithDetails]:
         """
         Get unique questions solved by a user between two dates.
+
+        Submissions of the same question are considered unique if they are
+        separated by at least min_hours_between_submissions hours.
 
         Args:
             username: The LeetCode username.
             start_date: The start date for filtering submissions.
             end_date: The end date for filtering submissions.
             include_details: Whether to include question details like difficulty.
+            min_hours_between_submissions: Minimum hours between submissions of the same
+                question to count them as separate submissions. Default is 24 hours.
 
         Returns:
             A list of unique questions solved between the specified dates.
@@ -103,17 +109,36 @@ class UserSubmissionsService:
             username, start_date, end_date, include_details
         )
 
-        # Use a dictionary to track unique questions by title_slug
-        unique_questions = {}
+        # Sort submissions by timestamp to process them chronologically
+        submissions.sort(key=lambda x: int(x["timestamp"]))
+
+        # Track submissions by question and their timestamps
+        question_submissions = {}
+        unique_submissions = []
+
         for submission in submissions:
             title_slug = submission["titleSlug"]
-            if title_slug not in unique_questions:
-                unique_questions[title_slug] = submission
+            submission_time = datetime.fromtimestamp(int(submission["timestamp"]))
 
-        return list(unique_questions.values())
+            if title_slug not in question_submissions:
+                # First submission of this question
+                question_submissions[title_slug] = [submission_time]
+                unique_submissions.append(submission)
+            else:
+                # Check if enough time has passed since the last submission of this question
+                last_submission_time = question_submissions[title_slug][-1]
+                time_diff = submission_time - last_submission_time
+
+                if time_diff >= timedelta(hours=min_hours_between_submissions):
+                    # Enough time has passed, count as a new unique submission
+                    question_submissions[title_slug].append(submission_time)
+                    unique_submissions.append(submission)
+                # If not enough time has passed, skip this submission
+
+        return unique_submissions
 
     def get_user_detailed_submissions_by_date_range(
-        self, username: str, start_date: datetime, end_date: datetime
+        self, username: str, start_date: datetime, end_date: datetime, min_hours_between_submissions: int = 24
     ) -> UserSubmissions:
         """
         Get detailed submission data for a user between specified start and end dates.
@@ -122,12 +147,14 @@ class UserSubmissionsService:
             username: The LeetCode username.
             start_date: The start date for filtering submissions.
             end_date: The end date for filtering submissions.
+            min_hours_between_submissions: Minimum hours between submissions of the same
+                question to count them as separate submissions. Default is 24 hours.
 
         Returns:
             A UserSubmissions object with lists of submission objects by difficulty.
         """
         questions: SubmissionWithDetails = self.get_unique_questions_between_dates(
-            username, start_date, end_date, include_details=True
+            username, start_date, end_date, include_details=True, min_hours_between_submissions=min_hours_between_submissions
         )
 
         # Create user submissions object

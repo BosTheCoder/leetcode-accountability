@@ -68,6 +68,7 @@ def stats(
     days: Optional[str] = typer.Option(None, help="Number of days to look back for submissions", callback=parse_optional_int),
     start_date: Optional[str] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     end_date: Optional[str] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
+    min_hours_between_submissions: int = typer.Option(24, help="Minimum hours between submissions of the same question to count them as separate submissions"),
     output_type: OutputType = typer.Option(
         OutputType.TEXT, help="Output format (text or html)"
     ),
@@ -103,7 +104,7 @@ def stats(
     for username in usernames:
         LOGGER.info(f"Fetching submissions for user [{username}]")
         user_submissions = submissions_service.get_user_detailed_submissions_by_date_range(
-            username, date_range.start_date, date_range.end_date
+            username, date_range.start_date, date_range.end_date, min_hours_between_submissions
         )
         user_submissions_list.append(user_submissions)
 
@@ -127,6 +128,7 @@ def accountability(
     days: Optional[str] = typer.Option(None, help="Number of days to look back for submissions", callback=parse_optional_int),
     start_date: Optional[str] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     end_date: Optional[str] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
+    min_hours_between_submissions: int = typer.Option(24, help="Minimum hours between submissions of the same question to count them as separate submissions"),
     cost_per_question: float = typer.Option(10.0, help="Cost per missed question"),
     output_type: OutputType = typer.Option(
         OutputType.TEXT, help="Output format (text or html)"
@@ -166,7 +168,7 @@ def accountability(
     )
 
     # Run accountability check
-    user_submissions = accountability_service.hold_accountable(date_range.start_date, date_range.end_date)
+    user_submissions = accountability_service.hold_accountable(start_date=date_range.start_date, end_date=date_range.end_date, min_hours_between_submissions=min_hours_between_submissions)
 
     # Present the stats
     completion_message = f"Accountability check completed. Users have been charged {cost_per_question} per missed question."

@@ -25,19 +25,25 @@ class CodingAccountabilityService:
         self.users = users
         self.cost_per_question = cost_per_question
 
-    def hold_accountable(self, start_date: datetime, end_date: datetime) -> list[UserSubmissions]:
+    def hold_accountable(self, start_date: datetime, end_date: datetime, min_hours_between_submissions: int = 24) -> list[UserSubmissions]:
         """
         Hold users accountable for their LeetCode submissions.
 
         This method processes each user, retrieves their detailed submission data,
         and creates Splitwise expenses for users who haven't met their goals.
+
+        Args:
+            start_date: The start date for filtering submissions.
+            end_date: The end date for filtering submissions.
+            min_hours_between_submissions: Minimum hours between submissions of the same
+                question to count them as separate submissions. Default is 24 hours.
         """
         print(f"Holding users accountable between {start_date.date()} and {end_date.date()}...")
         print("--" * 80)
         all_user_submissions = []
         for user in self.users:
             user_submissions = self.submission_service.get_user_detailed_submissions_by_date_range(
-                user.leetcode_id, start_date, end_date
+                username=user.leetcode_id, start_date=start_date, end_date=end_date, min_hours_between_submissions=min_hours_between_submissions
             )
             all_user_submissions.append(user_submissions)
 
