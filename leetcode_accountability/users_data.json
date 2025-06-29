@@ -17,13 +17,6 @@
     "min_questions": 7,
     "is_active": 1
   },
-  "mikkel": {
-    "name": "mikkel",
-    "leetcode_id": "MikkelAllison",
-    "email_address": "mikkel_a01@hotmail.co.uk",
-    "min_questions": 7,
-    "is_active": 1
-  },
   "osa": {
     "name": "osa",
     "leetcode_id": "osagiog",
@@ -33,28 +26,10 @@
     "min_questions": 7,
     "is_active": 1
   },
-  "emman": {
-    "name": "emman",
-    "leetcode_id": "ioByte",
-    "email_address": "e.okyere.eo@gmail.com",
-    "min_questions": 7,
-    "is_active": 1
-  },
-  "khalil": {
-    "name": "khalil",
-    "leetcode_id": "khalilgreenidge16",
-    "min_questions": 7,
-    "is_active": 1
-  },
-  "emma": {
-    "name": "emma",
-    "leetcode_id": "emmanuela_0",
-    "min_questions": 7,
-    "is_active": 1
-  },
-  "khezia": {
-    "name": "khezia",
-    "leetcode_id": "kheziantomo",
+  "shem": {
+    "name": "osa",
+    "leetcode_id": "shem101",
+    "email_address": "shemaiahnguessan@outlook.com",
     "min_questions": 7,
     "is_active": 1
   }
