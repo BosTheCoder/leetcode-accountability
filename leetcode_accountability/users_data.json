@@ -32,5 +32,12 @@
     "email_address": "shemaiahnguessan@outlook.com",
     "min_questions": 7,
     "is_active": 1
+  },
+  "mikkel": {
+    "name": "mikkel",
+    "leetcode_id": "MikkelAllison",
+    "email_address": "mikkel_a01@hotmail.co.uk",
+    "min_questions": 7,
+    "is_active": 1
   }
 }
