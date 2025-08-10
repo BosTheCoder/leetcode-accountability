@@ -20,13 +20,70 @@ A Python package for tracking LeetCode problem-solving activity across multiple 
 ## Installation
 
 1. Clone this repository
-2. Install the required dependencies from requirements.txt:
+2. Create and activate a virtual environment:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+```
+
+3. Install the required dependencies from requirements.txt:
 
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up your environment variables (see Configuration section)
+4. Set up your environment variables (see Configuration section)
+
+## Local Development Setup
+
+### Setting up the CLI alias
+
+For convenient access to the LeetCode stats, you can add a shell function to your `~/.bashrc_additions` file:
+
+```bash
+# ------------------------def stats()-----------------------------------------------------
+# stats: get LeetCode statistics for the current week (Monday 5am to next Monday 5am)
+# This function automatically calculates the date range for the current week
+# and runs the LeetCode accountability CLI with those dates.
+# Usage: stats [username] - if no username provided, shows stats for all active users
+stats() {
+  local project_dir="/path/to/your/leetcode-accountability"
+  local username="$1"
+  
+  # Check if project directory exists
+  [[ -d $project_dir ]] || { echo "⚠️  Project directory not found: $project_dir"; return 1; }
+  
+  # Calculate start date (last Monday 5am) and end date (next Monday 5am)
+  local start_date=$(date -d "last monday + 5 hours" +"%Y-%m-%dT%H:%M:%S")
+  local end_date=$(date -d "next monday + 5 hours" +"%Y-%m-%dT%H:%M:%S")
+  
+  # Navigate to project directory, activate venv, and run the CLI
+  if [[ -n $username ]]; then
+    # Run with specific username
+    (cd "$project_dir" && \
+     source .venv/bin/activate && \
+     python -m leetcode_accountability.cli stats "$username" \
+       --start-date "$start_date" \
+       --end-date "$end_date")
+  else
+    # Run without username (shows all active users)
+    (cd "$project_dir" && \
+     source .venv/bin/activate && \
+     python -m leetcode_accountability.cli stats \
+       --start-date "$start_date" \
+       --end-date "$end_date")
+  fi
+}
+# -----------------------------------------------------------------------------
+```
+
+Replace `/path/to/your/leetcode-accountability` with the actual path to your cloned repository.
+
+After adding this function:
+1. Run `source ~/.bashrc` to reload your shell configuration
+2. Use `stats` to get stats for all active users for the current week
+3. Use `stats username` to get stats for a specific user for the current week
 
 ## Usage
 
