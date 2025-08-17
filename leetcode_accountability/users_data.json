@@ -15,7 +15,7 @@
     "email_address": "set.wobble9d@icloud.com",
     "splitwise_group_id": "76659039",
     "min_questions": 7,
-    "is_active": 1
+    "is_active": 0
   },
   "osa": {
     "name": "osa",
@@ -38,6 +38,6 @@
     "leetcode_id": "MikkelAllison",
     "email_address": "mikkel_a01@hotmail.co.uk",
     "min_questions": 7,
-    "is_active": 1
+    "is_active": 0
   }
 }
