@@ -45,5 +45,11 @@
     "leetcode_id": "emmanuela_0",
     "min_questions": 7,
     "is_active": 1
+  },
+  "mridul": {
+    "name": "mridul",
+    "leetcode_id": "mridul_bhaskar",
+    "min_questions": 7,
+    "is_active": 1
   }
 }
