@@ -51,5 +51,11 @@
     "leetcode_id": "mridul_bhaskar",
     "min_questions": 7,
     "is_active": 1
+  },
+  "khalil": {
+    "name": "khalil",
+    "leetcode_id": "khalilgreenidge16",
+    "min_questions": 7,
+    "is_active": 1
   }
 }
