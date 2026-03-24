@@ -57,5 +57,12 @@
     "leetcode_id": "khalilgreenidge16",
     "min_questions": 7,
     "is_active": 1
+  },
+  "destinek": {
+    "name": "destinek",
+    "leetcode_id": "Destinek",
+    "email_address": "Kouambad@gmail.com",
+    "min_questions": 7,
+    "is_active": 1
   }
 }
