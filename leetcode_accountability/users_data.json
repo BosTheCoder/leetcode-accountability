@@ -64,5 +64,12 @@
     "email_address": "Kouambad@gmail.com",
     "min_questions": 7,
     "is_active": 1
+  },
+  "sewb": {
+    "name": "sewb",
+    "leetcode_id": "sewb",
+    "email_address": "sewb.dev@gmail.com",
+    "min_questions": 7,
+    "is_active": 1
   }
 }
