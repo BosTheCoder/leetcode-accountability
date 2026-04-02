@@ -65,7 +65,7 @@
     "min_questions": 7,
     "is_active": 1
   },
-  "sewb": {
+  "temi": {
     "name": "temi",
     "leetcode_id": "sewb",
     "email_address": "sewb.dev@gmail.com",
