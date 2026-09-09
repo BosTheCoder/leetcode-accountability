@@ -6,7 +6,6 @@ Command-line interface for LeetCode accountability tracking.
 """
 
 import logging
-import os
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import List, Optional, cast
@@ -21,7 +20,6 @@ from .accountability_service import CodingAccountabilityService
 from .entities import UserSubmissions
 from .leetcode_client import LeetCodeGraphQLClient
 from .presenters import get_presenter
-from .splitwise_client import SplitwiseClient
 from .submission_service import UserSubmissionsService
 from .user_loader_service import get_active_users
 from .date_utils import parse_optional_datetime, parse_optional_int
@@ -129,14 +127,13 @@ def accountability(
     start_date: Optional[str] = typer.Option(None, help="Start date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     end_date: Optional[str] = typer.Option(None, help="End date for filtering submissions (format: YYYY-MM-DDTHH:MM:SS)", callback=parse_optional_datetime),
     min_hours_between_submissions: int = typer.Option(24, help="Minimum hours between submissions of the same question to count them as separate submissions"),
-    cost_per_question: float = typer.Option(10.0, help="Cost per missed question"),
     output_type: OutputType = typer.Option(
         OutputType.TEXT, help="Output format (text or html)"
     ),
 ):
     """
     Run the weekly accountability check for all active users.
-    This will charge users for missed questions and print their stats.
+    This reports how each user performed against their weekly goal.
     """
     LOGGER.info("Running accountability check...")
 
@@ -153,25 +150,19 @@ def accountability(
     active_users = get_active_users()
     assert active_users, "No active users found. Please check your user data."
 
-    # Initialize Splitwise client
-    splitwise_api_key = os.environ["SPLITWISE_API_KEY"]
-    splitwise_client = SplitwiseClient(splitwise_api_key)
-
     # Initialize accountability service
     leetcode_client = LeetCodeGraphQLClient()
     submissions_service = UserSubmissionsService(leetcode_client)
     accountability_service = CodingAccountabilityService(
         submission_service=submissions_service,
-        splitwise_client=splitwise_client,
         users=active_users,
-        cost_per_question=cost_per_question,
     )
 
     # Run accountability check
     user_submissions = accountability_service.hold_accountable(start_date=date_range.start_date, end_date=date_range.end_date, min_hours_between_submissions=min_hours_between_submissions)
 
     # Present the stats
-    completion_message = f"Accountability check completed. Users have been charged {cost_per_question} per missed question."
+    completion_message = "Accountability check completed."
 
     # Get the appropriate presenter & present the stats
     presenter = get_presenter(output_type)

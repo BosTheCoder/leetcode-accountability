@@ -94,11 +94,8 @@ class UserSubmissions:
 class User:
     """Data class to represent a user in the LeetCode accountability system."""
 
-    # TODO remove references to specific clients in this base entity class
     name: str
     leetcode_id: str
-    splitwise_id: int | None
-    splitwise_group_id: int | None
     email_address: str | None
     min_questions: int
     is_active: bool

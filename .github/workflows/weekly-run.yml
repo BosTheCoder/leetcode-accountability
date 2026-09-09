@@ -28,8 +28,6 @@ on:
 jobs:
   run-stats:
     runs-on: ubuntu-latest
-    env:
-      SPLITWISE_API_KEY: ${{ secrets.SPLITWISE_API_KEY }}
     steps:
       - uses: actions/checkout@v3
 
